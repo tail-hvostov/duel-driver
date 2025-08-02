@@ -1,14 +1,10 @@
-#include <linux/init.h>
 #include <linux/module.h>
+#include <linux/spi/spi.h>
 
-static void duel_exit(void) {
-}
+static struct spi_driver duel_spi_driver = {
 
-static int __init duel_init(void) {
-    return 0;
-}
+};
 
-module_init(duel_init);
-module_exit(duel_exit);
+module_spi_driver(duel_spi_driver);
 
 MODULE_LICENSE("Dual BSD/GPL");
