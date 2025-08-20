@@ -1,6 +1,8 @@
 #ifndef _DUEL_FAST_DEVICE_H_
 #define _DUEL_FAST_DEVICE_H_
 
+#include <linux/cdev.h>
+
 struct duel_fast_dev {
     struct cdev cdev;
 };

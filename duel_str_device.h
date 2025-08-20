@@ -1,6 +1,8 @@
 #ifndef _DUEL_STR_DEVICE_H_
 #define _DUEL_STR_DEVICE_H_
 
+#include <linux/cdev.h>
+
 struct duel_str_dev {
     struct cdev cdev;
 };
