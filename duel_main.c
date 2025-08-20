@@ -41,25 +41,16 @@ static int __init duel_init(void) {
     //Создание устройств.
     result = duel_alloc_fast_dev(&fast_dev);
     if (result) {
-        printk(KERN_WARNING "Duel: out of memory.\n");
         goto fault;
     }
     result = duel_alloc_simple_dev(&simple_dev);
     if (result) {
-        printk(KERN_WARNING "Duel: out of memory.\n");
         goto fault;
     }
     result = duel_alloc_str_dev(&str_dev);
     if (result) {
-        printk(KERN_WARNING "Duel: out of memory.\n");
         goto fault;
     }
-
-    //devices = kmalloc(sizeof(struct duel_led_device) * duel_chrdev_count, GFP_KERNEL);
-    //if (!devices) {
-    //    result = -ENOMEM;
-    //    goto fault;
-    //}
 
     return 0;
 fault:
