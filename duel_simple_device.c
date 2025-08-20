@@ -6,7 +6,7 @@ static struct file_operations fops = {
 	//.release = pscu_release,
 	//.write = pscu_write,
 	//.read = pscu_read
-}
+};
 
 //Устанавливает NULL в случае неудачи.
 int duel_alloc_simple_dev(struct duel_simple_dev** device) {
