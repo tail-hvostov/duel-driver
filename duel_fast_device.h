@@ -8,7 +8,7 @@ struct duel_fast_dev {
 };
 
 //Устанавливает NULL в случае неудачи.
-extern int duel_alloc_fast_dev(struct duel_fast_dev** device);
+extern int duel_alloc_fast_dev(struct duel_fast_dev** device, int major, int minor);
 
 //Может безопасно получать NULL.
 extern void duel_free_fast_dev(struct duel_fast_dev* device);

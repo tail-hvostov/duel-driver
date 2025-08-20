@@ -39,15 +39,15 @@ static int __init duel_init(void) {
     char_major = MAJOR(dev);
 
     //Создание устройств.
-    result = duel_alloc_fast_dev(&fast_dev);
+    result = duel_alloc_fast_dev(&fast_dev, char_major, char_minor + 1);
     if (result) {
         goto fault;
     }
-    result = duel_alloc_simple_dev(&simple_dev);
+    result = duel_alloc_simple_dev(&simple_dev, char_major, char_minor + 2);
     if (result) {
         goto fault;
     }
-    result = duel_alloc_str_dev(&str_dev);
+    result = duel_alloc_str_dev(&str_dev, char_major, char_minor);
     if (result) {
         goto fault;
     }
