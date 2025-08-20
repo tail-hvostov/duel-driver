@@ -8,13 +8,24 @@ else
 endif
 
 KERNEL_DIR = /lib/modules/$(shell uname -r)/build
+SRC_DIR = src
+BUILD_DIR = build
 
 ccflags-y += $(DEBFLAGS)
 obj-m := duel.o
-duel-objs := duel_main.o duel_fast_device.o duel_simple_device.o duel_str_device.o
+duel-objs :=    $(SRC_DIR)/duel_main.o \
+				$(SRC_DIR)/duel_fast_device.o \
+				$(SRC_DIR)/duel_simple_device.o \
+				$(SRC_DIR)/duel_str_device.o
 
-all:
+EXTRA_CFLAGS += $(ccflags-y)
+
+all: $(BUILD_DIR)
 	make -C $(KERNEL_DIR) M=$(PWD) modules
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
 clean:
 	make -C $(KERNEL_DIR) M=$(PWD) clean
+	rm -rf $(BUILD_DIR)
