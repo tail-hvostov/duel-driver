@@ -3,11 +3,10 @@
 #include "duel_main.h"
 #include "duel_debug.h"
 
-#define CHARDEV_COUNT 1
+#define CHARDEV_COUNT 3
 
 static int char_major = 0;
 static int char_minor = 0;
-static int blk_major = 0;
 
 static void duel_exit(void) {
     dev_t devno = MKDEV(char_major, char_minor);
