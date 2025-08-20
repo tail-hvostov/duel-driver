@@ -7,7 +7,7 @@ else
 	DEBFLAGS = -O2
 endif
 
-KERNEL_DIR = /lib/modules/6.12.35-current-sunxi64/build
+KERNEL_DIR = /lib/modules/$(shell uname -r)/build
 
 ccflags-y += $(DEBFLAGS)
 obj-m := duel.o
