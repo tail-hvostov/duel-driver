@@ -1,8 +1,12 @@
 #include "duel_simple_device.h"
 
+static int fop_open(struct inode *inode, struct file *filp) {
+    return -ENODEV;
+}
+
 static struct file_operations fops = {
     .owner = THIS_MODULE,
-    //.open = pscu_open,
+    .open = fop_open,
 	//.release = pscu_release,
 	//.write = pscu_write,
 	//.read = pscu_read
