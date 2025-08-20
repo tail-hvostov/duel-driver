@@ -1,5 +1,13 @@
 #include "duel_str_device.h"
 
+static struct file_operations fops = {
+    .owner = THIS_MODULE,
+    //.open = pscu_open,
+	//.release = pscu_release,
+	//.write = pscu_write,
+	//.read = pscu_read
+}
+
 //Устанавливает NULL в случае неудачи.
 int duel_alloc_str_dev(struct duel_str_dev** device) {
     struct duel_str_dev* instance;
@@ -10,6 +18,9 @@ int duel_alloc_str_dev(struct duel_str_dev** device) {
         return -ENOMEM;
     }
     *device = instance;
+    cdev_init(&device->cdev, &fops);
+	device->cdev.owner = THIS_MODULE;
+	device->cdev.ops = &fops;
     return 0;
 }
 
