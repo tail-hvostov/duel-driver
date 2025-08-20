@@ -4,6 +4,7 @@
 #include "duel_debug.h"
 
 #define CHARDEV_COUNT 3
+#define DUEL_MODULE_NAME "duel"
 
 static int char_major = 0;
 static int char_minor = 0;
@@ -24,12 +25,12 @@ static int __init duel_init(void) {
     PDEBUG("Duel: initialization started...\n");
 
     //Динамическая инициализация области для символьных устройств.
-    result = alloc_chrdev_region(&dev, char_minor, CHARDEV_COUNT, "duel_char");
+    result = alloc_chrdev_region(&dev, char_minor, CHARDEV_COUNT, DUEL_MODULE_NAME);
     if (result < 0) {
         printk(KERN_WARNING "Duel: couldn't allocate chrdev_region.\n");
         return result;
     }
-    duel_major = MAJOR(dev);
+    char_major = MAJOR(dev);
 
     //devices = kmalloc(sizeof(struct duel_led_device) * duel_chrdev_count, GFP_KERNEL);
     //if (!devices) {
