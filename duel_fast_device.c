@@ -1,0 +1,1 @@
+#include "duel_fast_device.h"
