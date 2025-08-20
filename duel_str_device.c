@@ -18,9 +18,9 @@ int duel_alloc_str_dev(struct duel_str_dev** device) {
         return -ENOMEM;
     }
     *device = instance;
-    cdev_init(&device->cdev, &fops);
-	device->cdev.owner = THIS_MODULE;
-	device->cdev.ops = &fops;
+    cdev_init(&instance->cdev, &fops);
+	instance->cdev.owner = THIS_MODULE;
+	instance->cdev.ops = &fops;
     return 0;
 }
 
