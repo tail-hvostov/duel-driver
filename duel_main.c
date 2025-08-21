@@ -5,6 +5,7 @@
 #include "duel_fast_device.h"
 #include "duel_simple_device.h"
 #include "duel_str_device.h"
+#include "ssd1306/ssd1306_driver.h"
 
 #define CHARDEV_COUNT 3
 #define DUEL_MODULE_NAME "duel"
