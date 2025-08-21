@@ -4,10 +4,14 @@ static int fop_open(struct inode *inode, struct file *filp) {
     return -ENODEV;
 }
 
+static int fop_release(struct inode *inode, struct file *filp) {
+    return 0;
+}
+
 static struct file_operations fops = {
     .owner = THIS_MODULE,
     .open = fop_open,
-	//.release = pscu_release,
+	.release = fop_release,
 	//.write = pscu_write,
 	//.read = pscu_read
 };
