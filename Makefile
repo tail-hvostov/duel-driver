@@ -11,7 +11,11 @@ KERNEL_DIR = /lib/modules/$(shell uname -r)/build
 
 ccflags-y += $(DEBFLAGS)
 obj-m := duel.o
-duel-objs := duel_main.o duel_fast_device.o duel_simple_device.o duel_str_device.o
+duel-objs :=    duel_main.o \
+				duel_fast_device.o \
+				duel_simple_device.o \
+				duel_str_device.o \
+				duel_ops_access.o
 
 all:
 	make -C $(KERNEL_DIR) M=$(PWD) modules
