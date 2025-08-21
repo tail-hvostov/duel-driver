@@ -13,7 +13,7 @@ enum duel_device_ops {
     str_reading
 };
 
-extern int duel_request_ops(u8 ops);
-extern void duel_restore_ops(u8 ops);
+extern int duel_request_ops(unsigned long ops);
+extern void duel_restore_ops(unsigned long ops);
 
 #endif
