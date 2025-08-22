@@ -6,6 +6,7 @@ static int fop_open(struct inode *inode, struct file *filp) {
     struct spi_device* device = ssd1306_get_spi_device();
     unsigned long access = 0;
     int result;
+    struct duel_str_filp_data* filp_data;
     if (!device) {
         return -ENODEV;
     }
@@ -19,10 +20,17 @@ static int fop_open(struct inode *inode, struct file *filp) {
     if (result) {
         return result;
     }
-    return -ENODEV;
+    filp_data = kmalloc(sizeof(struct duel_str_filp_data), GFP_KERNEL);
+    filp_data->access = access;
+    filp_data->device = container_of(inode->i_cdev, struct duel_str_dev, cdev);
+    filp->private_data = filp_data;
+    return 0;
 }
 
 static int fop_release(struct inode *inode, struct file *filp) {
+    struct duel_str_filp_data* filp_data = filp->private_data;
+    duel_restore_ops(filp_data->access);
+    kfree(filp_data);
     return 0;
 }
 

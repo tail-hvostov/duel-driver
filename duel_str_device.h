@@ -9,7 +9,7 @@ struct duel_str_dev {
 
 struct duel_str_filp_data {
     struct duel_str_dev* device;
-    u8 access;
+    unsigned long access;
 };
 
 //Устанавливает NULL в случае неудачи.
