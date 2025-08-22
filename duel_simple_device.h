@@ -7,6 +7,11 @@ struct duel_simple_dev {
     struct cdev cdev;
 };
 
+struct duel_simple_filp_data {
+    struct duel_simple_dev* device;
+    unsigned long access;
+};
+
 //Устанавливает NULL в случае неудачи.
 extern int duel_alloc_simple_dev(struct duel_simple_dev** device, int major, int minor);
 
