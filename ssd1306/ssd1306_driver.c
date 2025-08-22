@@ -7,15 +7,30 @@ static const struct of_device_id ssd1306_dt_ids[] = {
     { }
 };
 
+//Вызывается при выключении компьютера.
+static void ssd1306_shutdown(struct spi_device *spi) {
+
+}
+
+//Вызывается при отсоединении устройства от драйвера в нормальных условиях.
+static void ssd1306_remove(struct spi_device *spi) {
+
+}
+
+//Вызывается при подключении устройства к драйверу.
+static int	ssd1306_probe(struct spi_device* spi) {
+
+}
+
 static struct spi_driver duel_ssd1306_driver = {
     .driver = {
         .name = SSD1306_DRIVER_NAME,
         .owner = THIS_MODULE,
         .of_match_table = ssd1306_dt_ids
     },
-    //.probe = duel_ssd1306_probe,
-    //.remove = duel_ssd1306_remove,
-    //.shutdown = duel_ssd1306_shutdown
+    .probe = ssd1306_probe,
+    .remove = ssd1306_remove,
+    .shutdown = ssd1306_shutdown
 };
 
 int ssd1306_init_driver(void) {
