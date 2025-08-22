@@ -52,7 +52,7 @@ void ssd1306_exit_driver(void) {
     spi_unregister_driver(&duel_ssd1306_driver);
 }
 
-struct spi_device* ssd1306_get_spi_device(void) {
+inline struct spi_device* ssd1306_get_spi_device(void) {
     return device_instance;
 }
 

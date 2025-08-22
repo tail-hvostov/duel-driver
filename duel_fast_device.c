@@ -1,6 +1,11 @@
 #include "duel_fast_device.h"
+#include "ssd1306/ssd1306_driver.h"
 
 static int fop_open(struct inode *inode, struct file *filp) {
+    struct spi_device* device = ssd1306_get_spi_device();
+    if (!device) {
+        return -ENODEV;
+    }
     return -ENODEV;
 }
 
