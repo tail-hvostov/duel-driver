@@ -7,6 +7,11 @@ struct duel_str_dev {
     struct cdev cdev;
 };
 
+struct duel_str_filp_data {
+    struct duel_str_dev* device;
+    u8 access;
+};
+
 //Устанавливает NULL в случае неудачи.
 extern int duel_alloc_str_dev(struct duel_str_dev** device, int major, int minor);
 

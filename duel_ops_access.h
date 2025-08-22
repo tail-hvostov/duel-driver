@@ -7,11 +7,9 @@
 #ifndef _DUEL_OPS_ACCESS_H_
 #define _DUEL_OPS_ACCESS_H_
 
-enum duel_device_ops {
-    writing,
-    raw_writing,
-    str_reading
-};
+#define DUEL_OP_WRITING 0x1
+#define DUEL_OP_RAW_WRITING 0x2
+#define DUEL_OP_STR_READING 0x2
 
 extern int duel_request_ops(unsigned long ops);
 extern void duel_restore_ops(unsigned long ops);

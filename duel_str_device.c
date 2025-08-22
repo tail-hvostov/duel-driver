@@ -1,10 +1,23 @@
 #include "duel_str_device.h"
 #include "ssd1306/ssd1306_driver.h"
+#include "duel_ops_access.h"
 
 static int fop_open(struct inode *inode, struct file *filp) {
     struct spi_device* device = ssd1306_get_spi_device();
+    unsigned long access = 0;
+    int result;
     if (!device) {
         return -ENODEV;
+    }
+    if (filp->f_mode & FMODE_WRITE) {
+        access |= DUEL_OP_WRITING;
+    }
+    if (filp->f_mode & FMODE_READ) {
+        access |= DUEL_OP_STR_READING;
+    }
+    result = duel_request_ops(access);
+    if (result) {
+        return result;
     }
     return -ENODEV;
 }
