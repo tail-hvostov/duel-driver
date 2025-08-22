@@ -6,4 +6,7 @@
 extern int ssd1306_init_driver(void);
 extern void ssd1306_exit_driver(void);
 
+//Может вернуть NULL.
+extern struct spi_device* ssd1306_get_spi_device(void);
+
 #endif

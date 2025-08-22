@@ -2,24 +2,29 @@
 
 #include <linux/spi/spi.h>
 
+static struct spi_device* device_instance = NULL;
+
 static const struct of_device_id ssd1306_dt_ids[] = {
     { .compatible = "duel,ssd1306" }, // Совпадение с Device Tree
     { }
 };
 
 //Вызывается при выключении компьютера.
-static void ssd1306_shutdown(struct spi_device *spi) {
+static void shutdown_device(struct spi_device *spi) {
 
 }
 
 //Вызывается при отсоединении устройства от драйвера в нормальных условиях.
-static void ssd1306_remove(struct spi_device *spi) {
+static void remove_device(struct spi_device *spi) {
 
 }
 
 //Вызывается при подключении устройства к драйверу.
-static int	ssd1306_probe(struct spi_device* spi) {
-
+static int probe_device(struct spi_device* spi) {
+    if (!device_instance) {
+        device_instance = spi;
+    }
+    return 0;
 }
 
 static struct spi_driver duel_ssd1306_driver = {
@@ -28,9 +33,9 @@ static struct spi_driver duel_ssd1306_driver = {
         .owner = THIS_MODULE,
         .of_match_table = ssd1306_dt_ids
     },
-    .probe = ssd1306_probe,
-    .remove = ssd1306_remove,
-    .shutdown = ssd1306_shutdown
+    .probe = probe_device,
+    .remove = remove_device,
+    .shutdown = shutdown_device
 };
 
 int ssd1306_init_driver(void) {
@@ -45,6 +50,10 @@ int ssd1306_init_driver(void) {
 
 void ssd1306_exit_driver(void) {
     spi_unregister_driver(&duel_ssd1306_driver);
+}
+
+struct spi_device* ssd1306_get_spi_device(void) {
+    return device_instance;
 }
 
 MODULE_DEVICE_TABLE(of, ssd1306_dt_ids);
