@@ -1,5 +1,8 @@
 #include "ssd1306_device.h"
 
+#define SSD1306_DC_GPIO_GROUP "dc"
+#define SSD1306_RES_GPIO_GROUP "res"
+
 int ssd1306_init_device(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata;
     drvdata = kmalloc(sizeof(struct ssd1306_drvdata), GFP_KERNEL);
@@ -7,6 +10,18 @@ int ssd1306_init_device(struct spi_device* spi) {
         printk(KERN_WARNING "Duel: out of memory.\n");
         return -ENOMEM;
     }
+
+    //devm_gpiod_get отличается тем, что он привязывает пин
+    //к struct device, освобождая от необходимости вызывать devm_gpiod_put.
+    //Вот до чего технологии дошли.
+    drvdata->dc_gpio = devm_gpiod_get(&spi->dev, SSD1306_DC_GPIO_GROUP, GPIOD_OUT_LOW);
+    drvdata->res_gpio = devm_gpiod_get(&spi->dev, SSD1306_RES_GPIO_GROUP, GPIOD_OUT_LOW);
+    if (IS_ERR(drvdata->dc_gpio) || IS_ERR(drvdata->res_gpio)) {
+        printk(KERN_WARNING "Duel: couldn't access ssd1306 pins.\n");
+        kfree(drvdata);
+        return -ENOENT;
+    }
+
     spi_set_drvdata(spi, drvdata);
     return 0;
 }
