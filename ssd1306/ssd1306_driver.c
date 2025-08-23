@@ -1,6 +1,5 @@
 #include "ssd1306_driver.h"
-
-#include <linux/spi/spi.h>
+#include "ssd1306_device.h"
 
 static struct spi_device* device_instance = NULL;
 
@@ -16,11 +15,16 @@ static void shutdown_device(struct spi_device *spi) {
 
 //Вызывается при отсоединении устройства от драйвера в нормальных условиях.
 static void remove_device(struct spi_device *spi) {
-
+    ssd1306_free_device(spi);
 }
 
 //Вызывается при подключении устройства к драйверу.
 static int probe_device(struct spi_device* spi) {
+    int result;
+    result = ssd1306_init_device(spi);
+    if (result) {
+        return result;
+    }
     if (!device_instance) {
         device_instance = spi;
     }
