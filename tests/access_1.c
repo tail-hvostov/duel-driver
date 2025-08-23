@@ -58,6 +58,16 @@ int main(int argc, const char* argv[]) {
     }
     close(str_file);
 
+    puts("6. Fast opening for reading while str reading.");
+    str_file = open("/dev/duel0", O_RDONLY);
+    fast_file = open("/dev/duel1", O_RDONLY);
+    if (fast_file < 0) {
+        close(str_file);
+        goto fault;
+    }
+    close(fast_file);
+    close(str_file);
+
     puts("Success!");
     return 0;
 fault:
