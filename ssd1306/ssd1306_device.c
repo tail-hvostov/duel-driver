@@ -30,3 +30,11 @@ void ssd1306_free_device(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
     kfree(drvdata);
 }
+
+int ssd1306_device_startup(struct spi_device* spi) {
+    return 0;
+}
+
+void ssd1306_device_exit(struct spi_device* spi) {
+    
+}

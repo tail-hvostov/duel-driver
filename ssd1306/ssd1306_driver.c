@@ -10,11 +10,13 @@ static const struct of_device_id ssd1306_dt_ids[] = {
 
 //Вызывается при выключении компьютера.
 static void shutdown_device(struct spi_device *spi) {
-
+    ssd1306_device_exit(spi);
 }
 
 //Вызывается при отсоединении устройства от драйвера в нормальных условиях.
 static void remove_device(struct spi_device *spi) {
+    //Потом будет блокировка.
+    ssd1306_device_exit(spi);
     ssd1306_free_device(spi);
 }
 
@@ -25,6 +27,8 @@ static int probe_device(struct spi_device* spi) {
     if (result) {
         return result;
     }
+    //Пока доступа ни у кого нет, можно не блокировать.
+    ssd1306_device_startup(spi);
     if (!device_instance) {
         device_instance = spi;
     }
