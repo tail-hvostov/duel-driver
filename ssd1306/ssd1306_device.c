@@ -21,6 +21,7 @@ int ssd1306_init_device(struct spi_device* spi) {
         kfree(drvdata);
         return -ENOENT;
     }
+    mutex_init(&drvdata->mutex);
 
     spi_set_drvdata(spi, drvdata);
     return 0;
@@ -28,7 +29,23 @@ int ssd1306_init_device(struct spi_device* spi) {
 
 void ssd1306_free_device(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+    mutex_destroy(&drvdata->mutex);
     kfree(drvdata);
+}
+
+inline int ssd1306_device_lock_interruptible(struct spi_device* spi) {
+    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+    return mutex_lock_interruptible(&drvdata->mutex);
+}
+
+inline void ssd1306_device_unlock(struct spi_device* spi) {
+    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+    mutex_unlock(&drvdata->mutex);
+}
+
+inline int ssd1306_device_trylock(struct spi_device* spi) {
+    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+    return mutex_trylock(&drvdata->mutex);
 }
 
 int ssd1306_device_startup(struct spi_device* spi) {
@@ -36,5 +53,5 @@ int ssd1306_device_startup(struct spi_device* spi) {
 }
 
 void ssd1306_device_exit(struct spi_device* spi) {
-    
+
 }
