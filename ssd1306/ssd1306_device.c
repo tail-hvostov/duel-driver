@@ -1,5 +1,7 @@
 #include "ssd1306_device.h"
 
+#include <linux/delay.h>
+
 #define SSD1306_DC_GPIO_GROUP "dc"
 #define SSD1306_RES_GPIO_GROUP "res"
 
@@ -48,7 +50,16 @@ inline int ssd1306_device_trylock(struct spi_device* spi) {
     return mutex_trylock(&drvdata->mutex);
 }
 
+inline void hard_reset(struct spi_device* spi) {
+    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+    gpiod_set_value(drvdata->res_gpio, 1);
+    fsleep(100000);
+    gpiod_set_value(drvdata->res_gpio, 0);
+    fsleep(100000);
+}
+
 int ssd1306_device_startup(struct spi_device* spi) {
+    hard_reset(spi);
     return 0;
 }
 
