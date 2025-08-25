@@ -5,11 +5,18 @@
 #include <linux/gpio/consumer.h>
 #include <linux/mutex.h>
 
+#define SSD1306_CMD_BUF_SIZE 40
+#define SSD1306_TRANSFER_BUF_SIZE 3
+
 struct ssd1306_drvdata {
     struct gpio_desc* dc_gpio;
     struct gpio_desc* res_gpio;
     //Мьютекс должен всегда использоваться внешними модулями.
     struct mutex mutex;
+    u8 cmd_buf[SSD1306_CMD_BUF_SIZE];
+    struct spi_transfer transfers[SSD1306_TRANSFER_BUF_SIZE];
+    int last_transfer;
+    int remaining_cmd_bytes;
 };
 
 extern int ssd1306_init_device(struct spi_device* spi);
