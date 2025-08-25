@@ -58,9 +58,90 @@ inline void hard_reset(struct spi_device* spi) {
     fsleep(100000);
 }
 
+void order_u8(struct spi_device* spi, u8 command) {
+
+}
+
+void order_u16(struct spi_device* spi, u16 command) {
+
+}
+
+int send_commands(struct spi_device* spi) {
+    return 0;
+}
+
+void order_delay(struct spi_device* spi, unsigned millis) {
+
+}
+
 int ssd1306_device_startup(struct spi_device* spi) {
     hard_reset(spi);
-    return 0;
+    //Set Display ON/OFF (AEh/AFh)
+    //AEh выключает дисплей.
+    order_u8(spi, 0xAE);
+    //Старшие 4 бита аргумента устанавливают частоту осциллятора внутри
+    //дисплея по некоторому правилу. Младшие устанавливают "делитель"
+    //частоты, изменяющийся от 1 до 16.
+    //Set Display Clock Divide Ratio/Oscillator Frequency
+    order_u16(spi, 0xD5F0);
+    //Set Multiplex Ratio
+    //Контроллер SSD1306 поддерживает различное число строк.
+    //Эта команда это число ограничивает. В моём случае это 39+1.
+    order_u16(spi, 0xA827);
+    //Set Display Offset
+    //Вертикально смещает изображение на некоторое количество строк.
+    order_u16(spi, 0xD300);
+    //Set Display Start Line (0x40-0x7F)
+    //Эта группа команд задаёт смещение строк дисплея в видеопамяти.
+    order_u8(spi, 0x40);
+    //set charge pump enable
+    //Я не нашёл эту команду в даташите. DeepSeek сказал, что она управляет
+    //повышением напряжения на внутреннем преобразователе. Значение 0x10
+    //его отключает.
+    order_u16(spi, 0x8D14);
+    //Set Memory Addressing Mode
+    //Устанавливает способ адресации. В моём случае - Page adressing mode.
+    order_u16(spi, 0x2002);
+    //Set Segment Re-map (A0h/A1h)
+    //Команда A1h устанавливает обратный порядок нумерации столбцов.
+    order_u8(spi, 0xA1);
+    //Set COM Output Scan Direction (C0h/C8h)
+    //C8h задаёт обратный порядок строк.
+    //Работает даже с уже прорисованными данными.
+    order_u8(spi, 0xC8);
+    //Set COM Pins Hardware Configuration (DAh)
+    //Тут сложно. Как я понял, это влияет на нумерацию строк (
+    //шахматный порядок) и на их взаимное расположение.
+    order_u16(spi, 0xDA12);
+    //Функции нет в даташите контроллера, но есть в даташите моего китайца.
+    //DeepSeek считает, что это как-то связано с выбором напряжения.
+    order_u16(spi, 0xAD30);
+    //Set Contrast Control for BANK0 (81h)
+    //Устанавливает контрастность дисплея от 00h до FFh.
+    order_u16(spi, 0x812F);
+    //Set Pre-charge Period (D9h)
+    //Устанавливает период заряда и разряда пикселей, кратный периоду CLK.
+    order_u16(spi, 0xD922);
+    //Set VCOMH Deselect Level (DBh)
+    //Устанавливает напряжение VCOMH. Я даже не стал разбираться.
+    order_u16(spi, 0xDB20);
+    //Entire Display ON (A4h/A5h)
+    //A4h - нормальный режим отображения пикселей.
+    //A5h - весь экран заливается белым.
+    order_u8(spi, 0xA4);
+    //Set Normal/Inverse Display (A6h/A7h)
+    //В нормальном режиме единица в видеопамяти означает белый пиксель.
+    order_u8(spi, 0xA6);
+    //Это две дружественные команды.
+    //Set Lower Column Start Address for Page Addressing Mode (00h~0Fh)
+    //Set Higher Column Start Address for Page Addressing Mode (10h~1Fh)
+    //Младшие 4 бита каждой из команд задают какую-то из частей 8-битного
+    //порядкового номера стартового столбца.
+    order_u16(spi, 0x0C11);
+    order_delay(spi, 100);
+    order_u8(spi, 0xAF);
+    order_delay(spi, 100);
+    return send_commands(spi);
 }
 
 void ssd1306_device_exit(struct spi_device* spi) {
