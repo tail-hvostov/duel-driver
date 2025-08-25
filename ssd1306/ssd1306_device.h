@@ -17,6 +17,7 @@ struct ssd1306_drvdata {
     struct spi_transfer transfers[SSD1306_TRANSFER_BUF_SIZE];
     int last_transfer;
     int remaining_cmd_bytes;
+    struct spi_message cmd_message;
 };
 
 extern int ssd1306_init_device(struct spi_device* spi);

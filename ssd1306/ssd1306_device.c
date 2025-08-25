@@ -5,6 +5,15 @@
 #define SSD1306_DC_GPIO_GROUP "dc"
 #define SSD1306_RES_GPIO_GROUP "res"
 
+void init_conversation(struct ssd1306_drvdata* drvdata) {
+    memset(&drvdata->transfers, 0, sizeof(struct spi_transfer) * SSD1306_TRANSFER_BUF_SIZE);
+    drvdata->transfers[0].tx_buf = drvdata->cmd_buf;
+    //Я посмотрел в исходниках, что init делает memset самостоятельно.
+    spi_message_init(&drvdata->cmd_message);
+    drvdata->last_transfer = 0;
+    drvdata->remaining_cmd_bytes = SSD1306_CMD_BUF_SIZE;
+}
+
 int ssd1306_init_device(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata;
     drvdata = kmalloc(sizeof(struct ssd1306_drvdata), GFP_KERNEL);
@@ -24,6 +33,7 @@ int ssd1306_init_device(struct spi_device* spi) {
         return -ENOENT;
     }
     mutex_init(&drvdata->mutex);
+    init_conversation(drvdata);
 
     spi_set_drvdata(spi, drvdata);
     return 0;
