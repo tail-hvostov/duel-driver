@@ -17,7 +17,9 @@ static void shutdown_device(struct spi_device *spi) {
 static void remove_device(struct spi_device *spi) {
     //Я здесь пользуюсь тем, что remove может быть вызван только в случае
     //успешного rmmod.
-    ssd1306_device_exit(spi);
+    if (ssd1306_device_exit(spi)) {
+        printk(KERN_WARNING "Duel: couldn't exit the display.\n");
+    }
     ssd1306_free_device(spi);
 }
 

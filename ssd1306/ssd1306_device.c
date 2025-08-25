@@ -144,6 +144,9 @@ int ssd1306_device_startup(struct spi_device* spi) {
     return send_commands(spi);
 }
 
-void ssd1306_device_exit(struct spi_device* spi) {
-
+int ssd1306_device_exit(struct spi_device* spi) {
+    order_u8(spi, 0xAE);
+    order_u16(spi, 0x8D10);
+    order_delay(spi, 150);
+    return send_commands(spi);
 }
