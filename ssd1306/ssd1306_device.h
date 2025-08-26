@@ -15,7 +15,7 @@ struct ssd1306_drvdata {
     struct mutex mutex;
     u8 cmd_buf[SSD1306_CMD_BUF_SIZE];
     struct spi_transfer transfers[SSD1306_TRANSFER_BUF_SIZE];
-    int last_transfer;
+    int cur_transfer;
     int remaining_cmd_bytes;
     struct spi_message cmd_message;
 };

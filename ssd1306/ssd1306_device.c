@@ -5,13 +5,14 @@
 #define SSD1306_DC_GPIO_GROUP "dc"
 #define SSD1306_RES_GPIO_GROUP "res"
 
-void init_conversation(struct ssd1306_drvdata* drvdata) {
+void reset_conversation(struct ssd1306_drvdata* drvdata) {
     memset(&drvdata->transfers, 0, sizeof(struct spi_transfer) * SSD1306_TRANSFER_BUF_SIZE);
     drvdata->transfers[0].tx_buf = drvdata->cmd_buf;
     //Я посмотрел в исходниках, что init делает memset самостоятельно.
     spi_message_init(&drvdata->cmd_message);
-    drvdata->last_transfer = 0;
+    drvdata->cur_transfer = 0;
     drvdata->remaining_cmd_bytes = SSD1306_CMD_BUF_SIZE;
+    spi_message_add_tail(&drvdata->transfers[0], &drvdata->cmd_message);
 }
 
 int ssd1306_init_device(struct spi_device* spi) {
@@ -33,7 +34,7 @@ int ssd1306_init_device(struct spi_device* spi) {
         return -ENOENT;
     }
     mutex_init(&drvdata->mutex);
-    init_conversation(drvdata);
+    reset_conversation(drvdata);
 
     spi_set_drvdata(spi, drvdata);
     return 0;
@@ -77,7 +78,11 @@ void order_u16(struct spi_device* spi, u16 command) {
 }
 
 int send_commands(struct spi_device* spi) {
-    return 0;
+    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+    int result;
+    result = spi_sync(spi, &drvdata->cmd_message);
+    reset_conversation(drvdata);
+    return result;
 }
 
 void order_delay(struct spi_device* spi, unsigned millis) {
