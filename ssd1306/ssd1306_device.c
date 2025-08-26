@@ -2,6 +2,7 @@
 #include "../duel_debug.h"
 
 #include <linux/delay.h>
+#include <linux/byteorder/generic.h>
 
 #define SSD1306_DC_GPIO_GROUP "dc"
 #define SSD1306_RES_GPIO_GROUP "res"
@@ -80,11 +81,40 @@ inline void hard_reset(struct spi_device* spi) {
 }
 
 void order_u8(struct spi_device* spi, u8 command) {
-
+    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+    struct spi_transfer* transfer;
+    u8* ptr = drvdata->cmd_buf + (SSD1306_CMD_BUF_SIZE - drvdata->remaining_cmd_bytes);
+    if ((drvdata->cur_transfer < SSD1306_TRANSFER_BUF_SIZE) &&
+        (drvdata->remaining_cmd_bytes >= 1)) {
+        transfer = &drvdata->transfers[drvdata->cur_transfer];
+        *ptr = command;
+        transfer->len += 1;
+        drvdata->remaining_cmd_bytes -= 1;
+    }
+    #ifdef DUEL_DEBUG
+    else {
+        PDEBUG("Duel: order_u8 failed.\n");
+    }
+    #endif
 }
 
 void order_u16(struct spi_device* spi, u16 command) {
-
+    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+    struct spi_transfer* transfer;
+    u16* ptr = (u16*)(drvdata->cmd_buf + (SSD1306_CMD_BUF_SIZE - drvdata->remaining_cmd_bytes));
+    if ((drvdata->cur_transfer < SSD1306_TRANSFER_BUF_SIZE) &&
+        (drvdata->remaining_cmd_bytes >= 2)) {
+        transfer = &drvdata->transfers[drvdata->cur_transfer];
+        command = cpu_to_be16(command);
+        *ptr = command;
+        transfer->len += 2;
+        drvdata->remaining_cmd_bytes -= 2;
+    }
+    #ifdef DUEL_DEBUG
+    else {
+        PDEBUG("Duel: order_u8 failed.\n");
+    }
+    #endif
 }
 
 inline int send_commands(struct spi_device* spi) {
