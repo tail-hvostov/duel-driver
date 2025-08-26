@@ -15,7 +15,6 @@ static void shutdown_device(struct spi_device *spi) {
 
 //Вызывается при отсоединении устройства от драйвера в нормальных условиях.
 static void remove_device(struct spi_device *spi) {
-    int result;
     //Я здесь пользуюсь тем, что remove может быть вызван только в случае
     //успешного rmmod.
     if (ssd1306_device_exit(spi) < 0) {
