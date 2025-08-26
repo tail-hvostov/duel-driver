@@ -1,4 +1,5 @@
 #include "ssd1306_device.h"
+#include "../duel_debug.h"
 
 #include <linux/delay.h>
 
@@ -13,6 +14,15 @@ void reset_conversation(struct ssd1306_drvdata* drvdata) {
     drvdata->cur_transfer = 0;
     drvdata->remaining_cmd_bytes = SSD1306_CMD_BUF_SIZE;
     spi_message_add_tail(&drvdata->transfers[0], &drvdata->cmd_message);
+}
+
+void shift_transfer(struct ssd1306_drvdata* drvdata) {
+    struct spi_transfer* transfer;
+    u8* buf = drvdata->cmd_buf + (SSD1306_CMD_BUF_SIZE - drvdata->remaining_cmd_bytes);
+    drvdata->cur_transfer += 1;
+    transfer = &drvdata->transfers[drvdata->cur_transfer];
+    transfer->tx_buf = buf;
+    spi_message_add_tail(transfer, &drvdata->cmd_message);
 }
 
 int ssd1306_init_device(struct spi_device* spi) {
@@ -77,7 +87,7 @@ void order_u16(struct spi_device* spi, u16 command) {
 
 }
 
-int send_commands(struct spi_device* spi) {
+inline int send_commands(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
     int result;
     result = spi_sync(spi, &drvdata->cmd_message);
@@ -86,7 +96,19 @@ int send_commands(struct spi_device* spi) {
 }
 
 void order_delay(struct spi_device* spi, unsigned millis) {
-
+    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+    struct spi_transfer* transfer;
+    if (drvdata->cur_transfer < SSD1306_TRANSFER_BUF_SIZE) {
+        transfer = &drvdata->transfers[drvdata->cur_transfer];
+        transfer->delay.value = millis * 1000;
+        transfer->delay.unit = SPI_DELAY_UNIT_USECS;
+        shift_transfer(drvdata);
+    }
+    #ifdef DUEL_DEBUG
+    else {
+        PDEBUG("Duel: transfer count exceeded.\n");
+    }
+    #endif
 }
 
 int ssd1306_device_startup(struct spi_device* spi) {
