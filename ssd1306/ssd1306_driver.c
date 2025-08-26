@@ -15,9 +15,10 @@ static void shutdown_device(struct spi_device *spi) {
 
 //Вызывается при отсоединении устройства от драйвера в нормальных условиях.
 static void remove_device(struct spi_device *spi) {
+    int result;
     //Я здесь пользуюсь тем, что remove может быть вызван только в случае
     //успешного rmmod.
-    if (ssd1306_device_exit(spi)) {
+    if (ssd1306_device_exit(spi) < 0) {
         printk(KERN_WARNING "Duel: couldn't exit the display.\n");
     }
     ssd1306_free_device(spi);
@@ -31,7 +32,7 @@ static int probe_device(struct spi_device* spi) {
         return result;
     }
     //Пока доступа ни у кого нет, можно не блокировать.
-    if (ssd1306_device_startup(spi)) {
+    if (ssd1306_device_startup(spi) < 0) {
         printk(KERN_WARNING "Duel: couldn't init the display.\n");
     }
     if (!device_instance) {
