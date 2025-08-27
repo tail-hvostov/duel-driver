@@ -222,3 +222,7 @@ inline u8* ssd1306_device_get_graphics_buf(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
     return drvdata->graphics_buf;
 }
+
+int ssd1306_device_redraw_pages(struct spi_device* spi, int first, int last) {
+    return 0;
+}

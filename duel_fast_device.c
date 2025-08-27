@@ -37,9 +37,15 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
     struct spi_device* device = ssd1306_get_spi_device();
     size_t remaining_bytes;
     ssize_t result;
+    int first_page, last_page;
     u8* graphics_buf;
     if (!device) {
         return -ENODEV;
+    }
+    remaining_bytes = SSD1306_GRAPHICS_BUF_SIZE - *f_pos;
+    count = (count > remaining_bytes) ? remaining_bytes : count;
+    if (!count) {
+        return 0;
     }
     if (filp->f_flags & O_NONBLOCK) {
         if (ssd1306_device_trylock(device)) {
@@ -51,14 +57,24 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
             return -ERESTARTSYS;
         }
     }
-    remaining_bytes = SSD1306_GRAPHICS_BUF_SIZE - *f_pos;
     graphics_buf = ssd1306_device_get_graphics_buf(device) + *f_pos;
-    count = (count > remaining_bytes) ? remaining_bytes : count;
     if (copy_from_user(graphics_buf, buf, count)) {
         result = -EFAULT;
         goto out;
     }
+    first_page = *fpos / SSD1306_DISPLAY_WIDTH;
     *f_pos += count;
+
+    last_page = *fpos / SSD1306_DISPLAY_WIDTH;
+    if (!(*fpos % SSD1306_DISPLAY_WIDTH)) {
+        last_page -= 1;
+    }
+    
+    if (ssd1306_device_redraw_pages() < 0) {
+        result = -EIO;
+        *f_pos -= count;
+        goto out;
+    }
     result = count;
 out:
     ssd1306_device_unlock(device);
