@@ -62,14 +62,14 @@ int ssd1306_device_startup(struct spi_device* spi) {
     //дисплея по некоторому правилу. Младшие устанавливают "делитель"
     //частоты, изменяющийся от 1 до 16.
     //Set Display Clock Divide Ratio/Oscillator Frequency
-    order_u16(spi, 0xD5F0);
+    ssd1306_order_u16(spi, 0xD5F0);
     //Set Multiplex Ratio
     //Контроллер SSD1306 поддерживает различное число строк.
     //Эта команда это число ограничивает. В моём случае это 39+1.
-    order_u16(spi, 0xA827);
+    ssd1306_order_u16(spi, 0xA827);
     //Set Display Offset
     //Вертикально смещает изображение на некоторое количество строк.
-    order_u16(spi, 0xD300);
+    ssd1306_order_u16(spi, 0xD300);
     //Set Display Start Line (0x40-0x7F)
     //Эта группа команд задаёт смещение строк дисплея в видеопамяти.
     ssd1306_order_u8(spi, 0x40);
@@ -77,10 +77,10 @@ int ssd1306_device_startup(struct spi_device* spi) {
     //Я не нашёл эту команду в даташите. DeepSeek сказал, что она управляет
     //повышением напряжения на внутреннем преобразователе. Значение 0x10
     //его отключает.
-    order_u16(spi, 0x8D14);
+    ssd1306_order_u16(spi, 0x8D14);
     //Set Memory Addressing Mode
     //Устанавливает способ адресации. В моём случае - Page adressing mode.
-    order_u16(spi, 0x2002);
+    ssd1306_order_u16(spi, 0x2002);
     //Set Segment Re-map (A0h/A1h)
     //Команда A1h устанавливает обратный порядок нумерации столбцов.
     ssd1306_order_u8(spi, 0xA1);
@@ -91,19 +91,19 @@ int ssd1306_device_startup(struct spi_device* spi) {
     //Set COM Pins Hardware Configuration (DAh)
     //Тут сложно. Как я понял, это влияет на нумерацию строк (
     //шахматный порядок) и на их взаимное расположение.
-    order_u16(spi, 0xDA12);
+    ssd1306_order_u16(spi, 0xDA12);
     //Функции нет в даташите контроллера, но есть в даташите моего китайца.
     //DeepSeek считает, что это как-то связано с выбором напряжения.
-    order_u16(spi, 0xAD30);
+    ssd1306_order_u16(spi, 0xAD30);
     //Set Contrast Control for BANK0 (81h)
     //Устанавливает контрастность дисплея от 00h до FFh.
-    order_u16(spi, 0x812F);
+    ssd1306_order_u16(spi, 0x812F);
     //Set Pre-charge Period (D9h)
     //Устанавливает период заряда и разряда пикселей, кратный периоду CLK.
-    order_u16(spi, 0xD922);
+    ssd1306_order_u16(spi, 0xD922);
     //Set VCOMH Deselect Level (DBh)
     //Устанавливает напряжение VCOMH. Я даже не стал разбираться.
-    order_u16(spi, 0xDB20);
+    ssd1306_order_u16(spi, 0xDB20);
     //Entire Display ON (A4h/A5h)
     //A4h - нормальный режим отображения пикселей.
     //A5h - весь экран заливается белым.
@@ -116,7 +116,7 @@ int ssd1306_device_startup(struct spi_device* spi) {
     //Set Higher Column Start Address for Page Addressing Mode (10h~1Fh)
     //Младшие 4 бита каждой из команд задают какую-то из частей 8-битного
     //порядкового номера стартового столбца.
-    order_u16(spi, 0x0C11);
+    ssd1306_order_u16(spi, 0x0C11);
     order_delay(spi, 100);
     ssd1306_order_u8(spi, 0xAF);
     order_delay(spi, 100);
@@ -125,7 +125,7 @@ int ssd1306_device_startup(struct spi_device* spi) {
 
 int ssd1306_device_exit(struct spi_device* spi) {
     ssd1306_order_u8(spi, 0xAE);
-    order_u16(spi, 0x8D10);
+    ssd1306_order_u16(spi, 0x8D10);
     order_delay(spi, 150);
     return send_commands(spi);
 }
@@ -138,7 +138,7 @@ inline u8* ssd1306_device_get_graphics_buf(struct spi_device* spi) {
 inline int select_page(struct spi_device* spi, unsigned int page) {
     u8 command = ((u8)page & SSD1306_PAGE_MASK) | (u8)0xB0;
     ssd1306_order_u8(spi, command);
-    order_u16(spi, 0x0C11);
+    ssd1306_order_u16(spi, 0x0C11);
     return send_commands(spi);
 }
 

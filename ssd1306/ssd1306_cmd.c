@@ -66,6 +66,25 @@ void ssd1306_order_u8(struct spi_device* spi, u8 command) {
     #endif
 }
 
+void ssd1306_order_u16(struct spi_device* spi, u16 command) {
+    struct ssd1306_cmd* cmd = get_cmd(spi);
+    struct spi_transfer* transfer;
+    u16* ptr = (u16*)(cmd->cmd_buf + (SSD1306_CMD_BUF_SIZE - cmd->remaining_cmd_bytes));
+    if ((cmd->cur_transfer < SSD1306_TRANSFER_BUF_SIZE) &&
+        (cmd->remaining_cmd_bytes >= 2)) {
+        transfer = &cmd->transfers[cmd->cur_transfer];
+        command = cpu_to_be16(command);
+        *ptr = command;
+        transfer->len += 2;
+        cmd->remaining_cmd_bytes -= 2;
+    }
+    #ifdef DUEL_DEBUG
+    else {
+        PDEBUG("Duel: order_u8 failed.\n");
+    }
+    #endif
+}
+
 void shift_transfer(struct ssd1306_drvdata* drvdata) {
     struct spi_transfer* transfer;
     u8* buf = drvdata->cmd_buf + (SSD1306_CMD_BUF_SIZE - drvdata->remaining_cmd_bytes);
@@ -73,25 +92,6 @@ void shift_transfer(struct ssd1306_drvdata* drvdata) {
     transfer = &drvdata->transfers[drvdata->cur_transfer];
     transfer->tx_buf = buf;
     spi_message_add_tail(transfer, &drvdata->cmd_message);
-}
-
-void order_u16(struct spi_device* spi, u16 command) {
-    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
-    struct spi_transfer* transfer;
-    u16* ptr = (u16*)(drvdata->cmd_buf + (SSD1306_CMD_BUF_SIZE - drvdata->remaining_cmd_bytes));
-    if ((drvdata->cur_transfer < SSD1306_TRANSFER_BUF_SIZE) &&
-        (drvdata->remaining_cmd_bytes >= 2)) {
-        transfer = &drvdata->transfers[drvdata->cur_transfer];
-        command = cpu_to_be16(command);
-        *ptr = command;
-        transfer->len += 2;
-        drvdata->remaining_cmd_bytes -= 2;
-    }
-    #ifdef DUEL_DEBUG
-    else {
-        PDEBUG("Duel: order_u8 failed.\n");
-    }
-    #endif
 }
 
 void order_delay(struct spi_device* spi, unsigned millis) {
