@@ -21,14 +21,13 @@ int ssd1306_init_device(struct spi_device* spi) {
         kfree(drvdata);
         return -ENOENT;
     }
+    spi_set_drvdata(spi, drvdata);
     result = ssd1306_init_cmd(spi);
     if (result) {
         kfree(drvdata);
         return result;
     }
     mutex_init(&drvdata->mutex);
-
-    spi_set_drvdata(spi, drvdata);
     return 0;
 }
 
