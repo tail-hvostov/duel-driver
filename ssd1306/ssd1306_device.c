@@ -1,5 +1,4 @@
 #include "ssd1306_device.h"
-#include "../duel_debug.h"
 
 #define SSD1306_DC_GPIO_GROUP "dc"
 #define SSD1306_PAGE_MASK 0x07
