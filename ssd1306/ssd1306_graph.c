@@ -2,6 +2,23 @@
 #include "ssd1306_device.h"
 #include "ssd1306_cmd.h"
 
+int ssd1306_init_graph(struct spi_device* spi) {
+    //devm_gpiod_get отличается тем, что он привязывает пин
+    //к struct device, освобождая от необходимости вызывать devm_gpiod_put.
+    //Вот до чего технологии дошли.
+    drvdata->dc_gpio = devm_gpiod_get(&spi->dev, SSD1306_DC_GPIO_GROUP, GPIOD_OUT_LOW);
+    if (IS_ERR(drvdata->dc_gpio)) {
+        printk(KERN_WARNING "Duel: couldn't access the dc pin.\n");
+        kfree(drvdata);
+        return -ENOENT;
+    }
+    return 0;;
+}
+
+inline void ssd1306_exit_graph(struct spi_device* spi) {
+    return;
+}
+
 inline struct ssd1306_graph* get_graph(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
     return &drvdata->graph;
