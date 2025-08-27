@@ -146,7 +146,7 @@ inline void init_page_transfer(struct ssd1306_drvdata* drvdata, unsigned int pag
     memset(&drvdata->graph_transfer, 0, sizeof(struct spi_transfer));
     drvdata->graph_transfer.tx_buf = drvdata->graphics_buf +
                                         page * SSD1306_DISPLAY_WIDTH;
-    drvdata->graph_transfer.len - SSD1306_DISPLAY_WIDTH;
+    drvdata->graph_transfer.len = SSD1306_DISPLAY_WIDTH;
     spi_message_init(&drvdata->graph_message);
     spi_message_add_tail(&drvdata->graph_transfer, &drvdata->graph_message);
 }
