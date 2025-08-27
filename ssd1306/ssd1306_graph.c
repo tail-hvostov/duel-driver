@@ -1,8 +1,15 @@
 #include "ssd1306_graph.h"
+#include "ssd1306_device.h"
+#include "ssd1306_cmd.h"
 
-inline u8* ssd1306_device_get_graphics_buf(struct spi_device* spi) {
+inline struct ssd1306_graph* get_graph(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
-    return drvdata->graphics_buf;
+    return &drvdata->graph;
+}
+
+inline u8* ssd1306_get_graphics_buf(struct spi_device* spi) {
+    struct ssd1306_graph* graph = get_graph(spi);
+    return graph->graphics_buf;
 }
 
 inline int select_page(struct spi_device* spi, unsigned int page) {
@@ -12,27 +19,27 @@ inline int select_page(struct spi_device* spi, unsigned int page) {
     return ssd1306_send_commands(spi);
 }
 
-inline void init_page_transfer(struct ssd1306_drvdata* drvdata, unsigned int page) {
-    memset(&drvdata->graph_transfer, 0, sizeof(struct spi_transfer));
-    drvdata->graph_transfer.tx_buf = drvdata->graphics_buf +
-                                        page * SSD1306_DISPLAY_WIDTH;
-    drvdata->graph_transfer.len = SSD1306_DISPLAY_WIDTH;
-    spi_message_init(&drvdata->graph_message);
-    spi_message_add_tail(&drvdata->graph_transfer, &drvdata->graph_message);
+inline void init_page_transfer(struct ssd1306_graph* graph, unsigned int page) {
+    memset(&graph->graph_transfer, 0, sizeof(struct spi_transfer));
+    graph->graph_transfer.tx_buf = graph->graphics_buf +
+                                    page * SSD1306_DISPLAY_WIDTH;
+    graph->graph_transfer.len = SSD1306_DISPLAY_WIDTH;
+    spi_message_init(&graph->graph_message);
+    spi_message_add_tail(&graph->graph_transfer, &graph->graph_message);
 }
 
 int redraw_page(struct spi_device* spi, unsigned int page) {
     int result;
-    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+    struct ssd1306_graph* graph = get_graph(spi);
     select_page(spi, page);
-    init_page_transfer(drvdata, page);
-    gpiod_set_value(drvdata->dc_gpio, 1);
-    result = spi_sync(spi, &drvdata->graph_message);
-    gpiod_set_value(drvdata->dc_gpio, 0);
+    init_page_transfer(graph, page);
+    gpiod_set_value(graph->dc_gpio, 1);
+    result = spi_sync(spi, &graph->graph_message);
+    gpiod_set_value(graph->dc_gpio, 0);
     return 0;
 }
 
-inline int ssd1306_device_redraw_pages(struct spi_device* spi, unsigned int first,
+inline int ssd1306_redraw_pages(struct spi_device* spi, unsigned int first,
                                         unsigned int last) {
     unsigned int i;
     int result = 0;
