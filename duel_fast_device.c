@@ -37,7 +37,7 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
     struct spi_device* device = ssd1306_get_spi_device();
     size_t remaining_bytes;
     ssize_t result;
-    int first_page, last_page;
+    unsigned int first_page, last_page;
     u8* graphics_buf;
     if (!device) {
         return -ENODEV;
@@ -63,7 +63,7 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
         last_page -= 1;
     }
 
-    if (ssd1306_device_redraw_pages(device, first_page, last_page) < 0) {
+    if (ssd1306_device_redraw_pages(device, first_page, last_page)) {
         result = -EIO;
         *f_pos -= count;
         goto out;
