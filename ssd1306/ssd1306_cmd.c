@@ -28,12 +28,12 @@ int ssd1306_init_cmd(struct spi_device* spi) {
     //к struct device, освобождая от необходимости вызывать devm_gpiod_put.
     //Вот до чего технологии дошли.
     cmd->res_gpio = devm_gpiod_get(&spi->dev, SSD1306_RES_GPIO_GROUP, GPIOD_OUT_LOW);
-    if (IS_ERR(IS_ERR(cmd->res_gpio)) {
+    if (IS_ERR(cmd->res_gpio)) {
         printk(KERN_WARNING "Duel: couldn't access the res pin.\n");
-        kfree(drvdata);
         return -ENOENT;
     }
     reset_conversation(cmd);
+    return 0;
 }
 
 inline void ssd1306_exit_cmd(struct spi_device* spi) {
@@ -52,7 +52,7 @@ void ssd1306_order_u8(struct spi_device* spi, u8 command) {
     struct ssd1306_cmd* cmd = get_cmd(spi);
     struct spi_transfer* transfer;
     u8* ptr = cmd->cmd_buf + (SSD1306_CMD_BUF_SIZE - cmd->remaining_cmd_bytes);
-    if ((cmd->cur_transfer < SSD1306_TRANSFER_BUF_SIZE) &&
+    if ((cmd->cur_transfer < SSD1306_CMD_TRANSFER_BUF_SIZE) &&
         (cmd->remaining_cmd_bytes >= 1)) {
         transfer = &cmd->transfers[cmd->cur_transfer];
         *ptr = command;
@@ -70,7 +70,7 @@ void ssd1306_order_u16(struct spi_device* spi, u16 command) {
     struct ssd1306_cmd* cmd = get_cmd(spi);
     struct spi_transfer* transfer;
     u16* ptr = (u16*)(cmd->cmd_buf + (SSD1306_CMD_BUF_SIZE - cmd->remaining_cmd_bytes));
-    if ((cmd->cur_transfer < SSD1306_TRANSFER_BUF_SIZE) &&
+    if ((cmd->cur_transfer < SSD1306_CMD_TRANSFER_BUF_SIZE) &&
         (cmd->remaining_cmd_bytes >= 2)) {
         transfer = &cmd->transfers[cmd->cur_transfer];
         command = cpu_to_be16(command);
@@ -97,7 +97,7 @@ void shift_transfer(struct ssd1306_cmd* cmd) {
 void ssd1306_order_delay(struct spi_device* spi, unsigned millis) {
     struct ssd1306_cmd* cmd = get_cmd(spi);
     struct spi_transfer* transfer;
-    if (cmd->cur_transfer < SSD1306_TRANSFER_BUF_SIZE) {
+    if (cmd->cur_transfer < SSD1306_CMD_TRANSFER_BUF_SIZE) {
         transfer = &cmd->transfers[cmd->cur_transfer];
         transfer->delay.value = millis * 1000;
         transfer->delay.unit = SPI_DELAY_UNIT_USECS;
