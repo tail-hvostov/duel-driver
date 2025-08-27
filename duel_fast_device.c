@@ -55,15 +55,15 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
         result = -EFAULT;
         goto out;
     }
-    first_page = *fpos / SSD1306_DISPLAY_WIDTH;
+    first_page = *f_pos / SSD1306_DISPLAY_WIDTH;
     *f_pos += count;
 
-    last_page = *fpos / SSD1306_DISPLAY_WIDTH;
-    if (!(*fpos % SSD1306_DISPLAY_WIDTH)) {
+    last_page = *f_pos / SSD1306_DISPLAY_WIDTH;
+    if (!(*f_pos % SSD1306_DISPLAY_WIDTH)) {
         last_page -= 1;
     }
 
-    if (ssd1306_device_redraw_pages() < 0) {
+    if (ssd1306_device_redraw_pages(device, first_page, last_page) < 0) {
         result = -EIO;
         *f_pos -= count;
         goto out;
