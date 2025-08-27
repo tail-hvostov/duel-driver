@@ -14,7 +14,10 @@ struct ssd1306_drvdata {
     //Мьютекс должен всегда использоваться внешними модулями.
     struct mutex mutex;
     struct ssd1306_cmd cmd;
+
     u8 graphics_buf[SSD1306_GRAPHICS_BUF_SIZE];
+    struct spi_transfer graph_transfer;
+    struct spi_message graph_message;
 };
 
 extern int ssd1306_init_device(struct spi_device* spi);
