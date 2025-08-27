@@ -224,14 +224,6 @@ inline u8* ssd1306_device_get_graphics_buf(struct spi_device* spi) {
     return drvdata->graphics_buf;
 }
 
-/*void duel_ssd1306_set_page(struct spi_device* dev, u8 page) {
-    struct duel_ssd1306_drvdata* drvdata = spi_get_drvdata(dev);
-    u8 command = (page & SSD1306_PAGE_MASK) | (u8)0xB0;
-    duel_ssd1306_commit_u8(drvdata, command);
-    duel_ssd1306_commit_u16(drvdata, 0x0C11);
-    duel_ssd1306_send_spi_commands(dev);
-}*/
-
 inline int select_page(struct spi_device* spi, unsigned int page) {
     u8 command = ((u8)page & SSD1306_PAGE_MASK) | (u8)0xB0;
     order_u8(spi, command);
