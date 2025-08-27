@@ -20,6 +20,7 @@ struct ssd1306_cmd {
 extern int ssd1306_init_cmd(struct spi_device* spi);
 extern void ssd1306_exit_cmd(struct spi_device* spi);
 
+extern void ssd1306_hard_reset(struct spi_device* spi);
 extern void ssd1306_order_u8(struct spi_device* spi, u8 command);
 
 #endif

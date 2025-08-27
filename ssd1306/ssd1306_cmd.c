@@ -29,7 +29,7 @@ int ssd1306_init_cmd(struct spi_device* spi) {
     //Вот до чего технологии дошли.
     cmd->res_gpio = devm_gpiod_get(&spi->dev, SSD1306_RES_GPIO_GROUP, GPIOD_OUT_LOW);
     if (IS_ERR(IS_ERR(cmd->res_gpio)) {
-        printk(KERN_WARNING "Duel: couldn't access ssd1306 pins.\n");
+        printk(KERN_WARNING "Duel: couldn't access the res pin.\n");
         kfree(drvdata);
         return -ENOENT;
     }
@@ -38,6 +38,14 @@ int ssd1306_init_cmd(struct spi_device* spi) {
 
 inline void ssd1306_exit_cmd(struct spi_device* spi) {
     return;
+}
+
+inline void ssd1306_hard_reset(struct spi_device* spi) {
+    struct ssd1306_cmd* cmd = get_cmd(spi);
+    gpiod_set_value(cmd->res_gpio, 1);
+    fsleep(100000);
+    gpiod_set_value(cmd->res_gpio, 0);
+    fsleep(100000);
 }
 
 void ssd1306_order_u8(struct spi_device* spi, u8 command) {
@@ -65,14 +73,6 @@ void shift_transfer(struct ssd1306_drvdata* drvdata) {
     transfer = &drvdata->transfers[drvdata->cur_transfer];
     transfer->tx_buf = buf;
     spi_message_add_tail(transfer, &drvdata->cmd_message);
-}
-
-inline void hard_reset(struct spi_device* spi) {
-    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
-    gpiod_set_value(drvdata->res_gpio, 1);
-    fsleep(100000);
-    gpiod_set_value(drvdata->res_gpio, 0);
-    fsleep(100000);
 }
 
 void order_u16(struct spi_device* spi, u16 command) {
@@ -108,4 +108,12 @@ void order_delay(struct spi_device* spi, unsigned millis) {
         PDEBUG("Duel: transfer count exceeded.\n");
     }
     #endif
+}
+
+inline int send_commands(struct spi_device* spi) {
+    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+    int result;
+    result = spi_sync(spi, &drvdata->cmd_message);
+    reset_conversation(drvdata);
+    return result;
 }

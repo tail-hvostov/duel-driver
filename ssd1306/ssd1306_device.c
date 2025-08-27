@@ -53,19 +53,11 @@ inline int ssd1306_device_trylock(struct spi_device* spi) {
     return mutex_trylock(&drvdata->mutex);
 }
 
-inline int send_commands(struct spi_device* spi) {
-    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
-    int result;
-    result = spi_sync(spi, &drvdata->cmd_message);
-    reset_conversation(drvdata);
-    return result;
-}
-
 int ssd1306_device_startup(struct spi_device* spi) {
-    hard_reset(spi);
+    ssd1306_hard_reset(spi);
     //Set Display ON/OFF (AEh/AFh)
     //AEh выключает дисплей.
-    order_u8(spi, 0xAE);
+    ssd1306_order_u8(spi, 0xAE);
     //Старшие 4 бита аргумента устанавливают частоту осциллятора внутри
     //дисплея по некоторому правилу. Младшие устанавливают "делитель"
     //частоты, изменяющийся от 1 до 16.
@@ -80,7 +72,7 @@ int ssd1306_device_startup(struct spi_device* spi) {
     order_u16(spi, 0xD300);
     //Set Display Start Line (0x40-0x7F)
     //Эта группа команд задаёт смещение строк дисплея в видеопамяти.
-    order_u8(spi, 0x40);
+    ssd1306_order_u8(spi, 0x40);
     //set charge pump enable
     //Я не нашёл эту команду в даташите. DeepSeek сказал, что она управляет
     //повышением напряжения на внутреннем преобразователе. Значение 0x10
@@ -91,11 +83,11 @@ int ssd1306_device_startup(struct spi_device* spi) {
     order_u16(spi, 0x2002);
     //Set Segment Re-map (A0h/A1h)
     //Команда A1h устанавливает обратный порядок нумерации столбцов.
-    order_u8(spi, 0xA1);
+    ssd1306_order_u8(spi, 0xA1);
     //Set COM Output Scan Direction (C0h/C8h)
     //C8h задаёт обратный порядок строк.
     //Работает даже с уже прорисованными данными.
-    order_u8(spi, 0xC8);
+    ssd1306_order_u8(spi, 0xC8);
     //Set COM Pins Hardware Configuration (DAh)
     //Тут сложно. Как я понял, это влияет на нумерацию строк (
     //шахматный порядок) и на их взаимное расположение.
@@ -115,10 +107,10 @@ int ssd1306_device_startup(struct spi_device* spi) {
     //Entire Display ON (A4h/A5h)
     //A4h - нормальный режим отображения пикселей.
     //A5h - весь экран заливается белым.
-    order_u8(spi, 0xA4);
+    ssd1306_order_u8(spi, 0xA4);
     //Set Normal/Inverse Display (A6h/A7h)
     //В нормальном режиме единица в видеопамяти означает белый пиксель.
-    order_u8(spi, 0xA6);
+    ssd1306_order_u8(spi, 0xA6);
     //Это две дружественные команды.
     //Set Lower Column Start Address for Page Addressing Mode (00h~0Fh)
     //Set Higher Column Start Address for Page Addressing Mode (10h~1Fh)
@@ -126,13 +118,13 @@ int ssd1306_device_startup(struct spi_device* spi) {
     //порядкового номера стартового столбца.
     order_u16(spi, 0x0C11);
     order_delay(spi, 100);
-    order_u8(spi, 0xAF);
+    ssd1306_order_u8(spi, 0xAF);
     order_delay(spi, 100);
     return send_commands(spi);
 }
 
 int ssd1306_device_exit(struct spi_device* spi) {
-    order_u8(spi, 0xAE);
+    ssd1306_order_u8(spi, 0xAE);
     order_u16(spi, 0x8D10);
     order_delay(spi, 150);
     return send_commands(spi);
@@ -145,7 +137,7 @@ inline u8* ssd1306_device_get_graphics_buf(struct spi_device* spi) {
 
 inline int select_page(struct spi_device* spi, unsigned int page) {
     u8 command = ((u8)page & SSD1306_PAGE_MASK) | (u8)0xB0;
-    order_u8(spi, command);
+    ssd1306_order_u8(spi, command);
     order_u16(spi, 0x0C11);
     return send_commands(spi);
 }
