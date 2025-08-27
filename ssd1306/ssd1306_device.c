@@ -217,3 +217,8 @@ int ssd1306_device_exit(struct spi_device* spi) {
     order_delay(spi, 150);
     return send_commands(spi);
 }
+
+inline u8* ssd1306_device_get_graphics_buf(struct spi_device* spi) {
+    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+    return drvdata->graphics_buf;
+}
