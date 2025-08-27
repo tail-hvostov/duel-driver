@@ -2,6 +2,9 @@
 #include "ssd1306_device.h"
 #include "ssd1306_cmd.h"
 
+#define SSD1306_DC_GPIO_GROUP "dc"
+#define SSD1306_PAGE_MASK 0x07
+
 int ssd1306_init_graph(struct spi_device* spi) {
     //devm_gpiod_get отличается тем, что он привязывает пин
     //к struct device, освобождая от необходимости вызывать devm_gpiod_put.

@@ -1,8 +1,5 @@
 #include "ssd1306_device.h"
 
-#define SSD1306_DC_GPIO_GROUP "dc"
-#define SSD1306_PAGE_MASK 0x07
-
 int ssd1306_init_device(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata;
     int result;
