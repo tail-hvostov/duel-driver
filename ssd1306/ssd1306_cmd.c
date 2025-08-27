@@ -85,23 +85,23 @@ void ssd1306_order_u16(struct spi_device* spi, u16 command) {
     #endif
 }
 
-void shift_transfer(struct ssd1306_drvdata* drvdata) {
+void shift_transfer(struct ssd1306_cmd* cmd) {
     struct spi_transfer* transfer;
-    u8* buf = drvdata->cmd_buf + (SSD1306_CMD_BUF_SIZE - drvdata->remaining_cmd_bytes);
-    drvdata->cur_transfer += 1;
-    transfer = &drvdata->transfers[drvdata->cur_transfer];
+    u8* buf = cmd->cmd_buf + (SSD1306_CMD_BUF_SIZE - cmd->remaining_cmd_bytes);
+    cmd->cur_transfer += 1;
+    transfer = &cmd->transfers[cmd->cur_transfer];
     transfer->tx_buf = buf;
-    spi_message_add_tail(transfer, &drvdata->cmd_message);
+    spi_message_add_tail(transfer, &cmd->cmd_message);
 }
 
-void order_delay(struct spi_device* spi, unsigned millis) {
-    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+void ssd1306_order_delay(struct spi_device* spi, unsigned millis) {
+    struct ssd1306_cmd* cmd = get_cmd(spi);
     struct spi_transfer* transfer;
-    if (drvdata->cur_transfer < SSD1306_TRANSFER_BUF_SIZE) {
-        transfer = &drvdata->transfers[drvdata->cur_transfer];
+    if (cmd->cur_transfer < SSD1306_TRANSFER_BUF_SIZE) {
+        transfer = &cmd->transfers[cmd->cur_transfer];
         transfer->delay.value = millis * 1000;
         transfer->delay.unit = SPI_DELAY_UNIT_USECS;
-        shift_transfer(drvdata);
+        shift_transfer(cmd);
     }
     #ifdef DUEL_DEBUG
     else {

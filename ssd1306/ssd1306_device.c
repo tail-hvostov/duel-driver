@@ -117,16 +117,16 @@ int ssd1306_device_startup(struct spi_device* spi) {
     //Младшие 4 бита каждой из команд задают какую-то из частей 8-битного
     //порядкового номера стартового столбца.
     ssd1306_order_u16(spi, 0x0C11);
-    order_delay(spi, 100);
+    ssd1306_order_delay(spi, 100);
     ssd1306_order_u8(spi, 0xAF);
-    order_delay(spi, 100);
+    ssd1306_order_delay(spi, 100);
     return send_commands(spi);
 }
 
 int ssd1306_device_exit(struct spi_device* spi) {
     ssd1306_order_u8(spi, 0xAE);
     ssd1306_order_u16(spi, 0x8D10);
-    order_delay(spi, 150);
+    ssd1306_order_delay(spi, 150);
     return send_commands(spi);
 }
 
