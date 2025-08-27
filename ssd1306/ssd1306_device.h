@@ -8,6 +8,10 @@
 #define SSD1306_CMD_BUF_SIZE 40
 #define SSD1306_TRANSFER_BUF_SIZE 3
 
+#define SSD1306_DISPLAY_WIDTH 72
+#define SSD1306_DISPLAY_PAGES 5
+#define SSD1306_GRAPHICS_BUF_SIZE (SSD1306_DISPLAY_WIDTH * SSD1306_DISPLAY_PAGES)
+
 struct ssd1306_drvdata {
     struct gpio_desc* dc_gpio;
     struct gpio_desc* res_gpio;

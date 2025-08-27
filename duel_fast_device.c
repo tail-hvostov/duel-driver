@@ -1,5 +1,6 @@
 #include "duel_fast_device.h"
 #include "ssd1306/ssd1306_driver.h"
+#include "ssd1306/ssd1306_device.h"
 #include "duel_ops_access.h"
 
 static int fop_open(struct inode *inode, struct file *filp) {
@@ -32,11 +33,18 @@ static int fop_release(struct inode *inode, struct file *filp) {
     return 0;
 }
 
+static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos) {
+    size_t remaining_bytes = SSD1306_GRAPHICS_BUF_SIZE - 1 - *f_pos;
+    count = (count > remaining_bytes) ? remaining_bytes : count;
+    *f_pos += count;
+    return count;
+}
+
 static struct file_operations fops = {
     .owner = THIS_MODULE,
     .open = fop_open,
 	.release = fop_release,
-	//.write = pscu_write,
+	.write = fop_write,
 	//.read = pscu_read
 };
 
