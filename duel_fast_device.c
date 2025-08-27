@@ -36,6 +36,7 @@ static int fop_release(struct inode *inode, struct file *filp) {
 static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos) {
     struct spi_device* device = ssd1306_get_spi_device();
     size_t remaining_bytes;
+    ssize_t result;
     u8* graphics_buf;
     if (!device) {
         return -ENODEV;
@@ -51,12 +52,17 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
         }
     }
     remaining_bytes = SSD1306_GRAPHICS_BUF_SIZE - *f_pos;
-    graphics_buf = ssd1306_device_get_graphics_buf(device);
+    graphics_buf = ssd1306_device_get_graphics_buf(device) + *f_pos;
     count = (count > remaining_bytes) ? remaining_bytes : count;
+    if (copy_from_user(graphics_buf, buf, count)) {
+        result = -EFAULT;
+        goto out;
+    }
     *f_pos += count;
-
+    result = count;
+out:
     ssd1306_device_unlock(device);
-    return count;
+    return result;
 }
 
 static struct file_operations fops = {
