@@ -6,6 +6,7 @@
 
 #define SSD1306_DC_GPIO_GROUP "dc"
 #define SSD1306_RES_GPIO_GROUP "res"
+#define SSD1306_PAGE_MASK 0x07
 
 void reset_conversation(struct ssd1306_drvdata* drvdata) {
     memset(&drvdata->transfers, 0, sizeof(struct spi_transfer) * SSD1306_TRANSFER_BUF_SIZE);
@@ -232,11 +233,14 @@ inline u8* ssd1306_device_get_graphics_buf(struct spi_device* spi) {
 }*/
 
 inline int select_page(struct spi_device* spi, unsigned int page) {
-    
+    u8 command = ((u8)page & SSD1306_PAGE_MASK) | (u8)0xB0;
+    order_u8(spi, command);
+    order_u16(spi, 0x0C11);
+    return send_commands(spi);
 }
 
 int redraw_page(struct spi_device* spi, unsigned int page) {
-
+    select_page(spi, page);
     return 0;
 }
 
