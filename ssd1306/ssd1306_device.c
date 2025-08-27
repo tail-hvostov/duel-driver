@@ -120,14 +120,14 @@ int ssd1306_device_startup(struct spi_device* spi) {
     ssd1306_order_delay(spi, 100);
     ssd1306_order_u8(spi, 0xAF);
     ssd1306_order_delay(spi, 100);
-    return send_commands(spi);
+    return ssd1306_send_commands(spi);
 }
 
 int ssd1306_device_exit(struct spi_device* spi) {
     ssd1306_order_u8(spi, 0xAE);
     ssd1306_order_u16(spi, 0x8D10);
     ssd1306_order_delay(spi, 150);
-    return send_commands(spi);
+    return ssd1306_send_commands(spi);
 }
 
 inline u8* ssd1306_device_get_graphics_buf(struct spi_device* spi) {
@@ -139,7 +139,7 @@ inline int select_page(struct spi_device* spi, unsigned int page) {
     u8 command = ((u8)page & SSD1306_PAGE_MASK) | (u8)0xB0;
     ssd1306_order_u8(spi, command);
     ssd1306_order_u16(spi, 0x0C11);
-    return send_commands(spi);
+    return ssd1306_send_commands(spi);
 }
 
 int redraw_page(struct spi_device* spi, unsigned int page) {

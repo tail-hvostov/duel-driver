@@ -110,10 +110,10 @@ void ssd1306_order_delay(struct spi_device* spi, unsigned millis) {
     #endif
 }
 
-inline int send_commands(struct spi_device* spi) {
-    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+inline int ssd1306_send_commands(struct spi_device* spi) {
+    struct ssd1306_cmd* cmd = get_cmd(spi);
     int result;
-    result = spi_sync(spi, &drvdata->cmd_message);
-    reset_conversation(drvdata);
+    result = spi_sync(spi, &cmd->cmd_message);
+    reset_conversation(cmd);
     return result;
 }

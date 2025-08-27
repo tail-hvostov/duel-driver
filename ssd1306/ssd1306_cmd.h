@@ -24,5 +24,6 @@ extern void ssd1306_hard_reset(struct spi_device* spi);
 extern void ssd1306_order_u8(struct spi_device* spi, u8 command);
 extern void ssd1306_order_u16(struct spi_device* spi, u16 command);
 extern void ssd1306_order_delay(struct spi_device* spi, unsigned millis);
+extern int ssd1306_send_commands(struct spi_device* spi);
 
 #endif
