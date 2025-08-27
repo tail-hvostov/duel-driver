@@ -16,9 +16,8 @@ int ssd1306_init_graph(struct spi_device* spi) {
     //к struct device, освобождая от необходимости вызывать devm_gpiod_put.
     //Вот до чего технологии дошли.
     graph->dc_gpio = devm_gpiod_get(&spi->dev, SSD1306_DC_GPIO_GROUP, GPIOD_OUT_LOW);
-    if (IS_ERR(drvdata->dc_gpio)) {
+    if (IS_ERR(graph->dc_gpio)) {
         printk(KERN_WARNING "Duel: couldn't access the dc pin.\n");
-        kfree(drvdata);
         return -ENOENT;
     }
     return 0;;
