@@ -23,6 +23,8 @@ struct ssd1306_drvdata {
     int cur_transfer;
     int remaining_cmd_bytes;
     struct spi_message cmd_message;
+
+    u8 graphics_buf[SSD1306_GRAPHICS_BUF_SIZE];
 };
 
 extern int ssd1306_init_device(struct spi_device* spi);
