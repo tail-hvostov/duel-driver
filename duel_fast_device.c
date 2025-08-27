@@ -34,7 +34,7 @@ static int fop_release(struct inode *inode, struct file *filp) {
 }
 
 static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos) {
-    size_t remaining_bytes = SSD1306_GRAPHICS_BUF_SIZE - 1 - *f_pos;
+    size_t remaining_bytes = SSD1306_GRAPHICS_BUF_SIZE - *f_pos;
     count = (count > remaining_bytes) ? remaining_bytes : count;
     *f_pos += count;
     return count;
