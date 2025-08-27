@@ -1,34 +1,12 @@
 #include "ssd1306_device.h"
 #include "../duel_debug.h"
 
-#include <linux/delay.h>
-#include <linux/byteorder/generic.h>
-
 #define SSD1306_DC_GPIO_GROUP "dc"
-#define SSD1306_RES_GPIO_GROUP "res"
 #define SSD1306_PAGE_MASK 0x07
-
-void reset_conversation(struct ssd1306_drvdata* drvdata) {
-    memset(&drvdata->transfers, 0, sizeof(struct spi_transfer) * SSD1306_TRANSFER_BUF_SIZE);
-    drvdata->transfers[0].tx_buf = drvdata->cmd_buf;
-    //Я посмотрел в исходниках, что init делает memset самостоятельно.
-    spi_message_init(&drvdata->cmd_message);
-    drvdata->cur_transfer = 0;
-    drvdata->remaining_cmd_bytes = SSD1306_CMD_BUF_SIZE;
-    spi_message_add_tail(&drvdata->transfers[0], &drvdata->cmd_message);
-}
-
-void shift_transfer(struct ssd1306_drvdata* drvdata) {
-    struct spi_transfer* transfer;
-    u8* buf = drvdata->cmd_buf + (SSD1306_CMD_BUF_SIZE - drvdata->remaining_cmd_bytes);
-    drvdata->cur_transfer += 1;
-    transfer = &drvdata->transfers[drvdata->cur_transfer];
-    transfer->tx_buf = buf;
-    spi_message_add_tail(transfer, &drvdata->cmd_message);
-}
 
 int ssd1306_init_device(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata;
+    int result;
     drvdata = kmalloc(sizeof(struct ssd1306_drvdata), GFP_KERNEL);
     if (!drvdata) {
         printk(KERN_WARNING "Duel: out of memory.\n");
@@ -39,14 +17,16 @@ int ssd1306_init_device(struct spi_device* spi) {
     //к struct device, освобождая от необходимости вызывать devm_gpiod_put.
     //Вот до чего технологии дошли.
     drvdata->dc_gpio = devm_gpiod_get(&spi->dev, SSD1306_DC_GPIO_GROUP, GPIOD_OUT_LOW);
-    drvdata->res_gpio = devm_gpiod_get(&spi->dev, SSD1306_RES_GPIO_GROUP, GPIOD_OUT_LOW);
-    if (IS_ERR(drvdata->dc_gpio) || IS_ERR(drvdata->res_gpio)) {
-        printk(KERN_WARNING "Duel: couldn't access ssd1306 pins.\n");
+    if (IS_ERR(drvdata->dc_gpio)) {
+        printk(KERN_WARNING "Duel: couldn't access the dc pin.\n");
         kfree(drvdata);
         return -ENOENT;
     }
+    result = ssd1306_init_cmd(spi);
+    if (result) {
+        return result;
+    }
     mutex_init(&drvdata->mutex);
-    reset_conversation(drvdata);
 
     spi_set_drvdata(spi, drvdata);
     return 0;
@@ -55,6 +35,7 @@ int ssd1306_init_device(struct spi_device* spi) {
 void ssd1306_free_device(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
     mutex_destroy(&drvdata->mutex);
+    ssd1306_exit_cmd(spi);
     kfree(drvdata);
 }
 
@@ -73,73 +54,12 @@ inline int ssd1306_device_trylock(struct spi_device* spi) {
     return mutex_trylock(&drvdata->mutex);
 }
 
-inline void hard_reset(struct spi_device* spi) {
-    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
-    gpiod_set_value(drvdata->res_gpio, 1);
-    fsleep(100000);
-    gpiod_set_value(drvdata->res_gpio, 0);
-    fsleep(100000);
-}
-
-void order_u8(struct spi_device* spi, u8 command) {
-    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
-    struct spi_transfer* transfer;
-    u8* ptr = drvdata->cmd_buf + (SSD1306_CMD_BUF_SIZE - drvdata->remaining_cmd_bytes);
-    if ((drvdata->cur_transfer < SSD1306_TRANSFER_BUF_SIZE) &&
-        (drvdata->remaining_cmd_bytes >= 1)) {
-        transfer = &drvdata->transfers[drvdata->cur_transfer];
-        *ptr = command;
-        transfer->len += 1;
-        drvdata->remaining_cmd_bytes -= 1;
-    }
-    #ifdef DUEL_DEBUG
-    else {
-        PDEBUG("Duel: order_u8 failed.\n");
-    }
-    #endif
-}
-
-void order_u16(struct spi_device* spi, u16 command) {
-    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
-    struct spi_transfer* transfer;
-    u16* ptr = (u16*)(drvdata->cmd_buf + (SSD1306_CMD_BUF_SIZE - drvdata->remaining_cmd_bytes));
-    if ((drvdata->cur_transfer < SSD1306_TRANSFER_BUF_SIZE) &&
-        (drvdata->remaining_cmd_bytes >= 2)) {
-        transfer = &drvdata->transfers[drvdata->cur_transfer];
-        command = cpu_to_be16(command);
-        *ptr = command;
-        transfer->len += 2;
-        drvdata->remaining_cmd_bytes -= 2;
-    }
-    #ifdef DUEL_DEBUG
-    else {
-        PDEBUG("Duel: order_u8 failed.\n");
-    }
-    #endif
-}
-
 inline int send_commands(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
     int result;
     result = spi_sync(spi, &drvdata->cmd_message);
     reset_conversation(drvdata);
     return result;
-}
-
-void order_delay(struct spi_device* spi, unsigned millis) {
-    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
-    struct spi_transfer* transfer;
-    if (drvdata->cur_transfer < SSD1306_TRANSFER_BUF_SIZE) {
-        transfer = &drvdata->transfers[drvdata->cur_transfer];
-        transfer->delay.value = millis * 1000;
-        transfer->delay.unit = SPI_DELAY_UNIT_USECS;
-        shift_transfer(drvdata);
-    }
-    #ifdef DUEL_DEBUG
-    else {
-        PDEBUG("Duel: transfer count exceeded.\n");
-    }
-    #endif
 }
 
 int ssd1306_device_startup(struct spi_device* spi) {

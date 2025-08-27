@@ -1,12 +1,9 @@
 #ifndef _SSD1306_DEVICE_H_
 #define _SSD1306_DEVICE_H_
 
-#include <linux/spi/spi.h>
-#include <linux/gpio/consumer.h>
 #include <linux/mutex.h>
 
-#define SSD1306_CMD_BUF_SIZE 40
-#define SSD1306_TRANSFER_BUF_SIZE 3
+#include "ssd1306_cmd.h"
 
 #define SSD1306_DISPLAY_WIDTH 72
 #define SSD1306_DISPLAY_PAGES 5
@@ -14,16 +11,9 @@
 
 struct ssd1306_drvdata {
     struct gpio_desc* dc_gpio;
-    struct gpio_desc* res_gpio;
     //Мьютекс должен всегда использоваться внешними модулями.
     struct mutex mutex;
-    
-    u8 cmd_buf[SSD1306_CMD_BUF_SIZE];
-    struct spi_transfer transfers[SSD1306_TRANSFER_BUF_SIZE];
-    int cur_transfer;
-    int remaining_cmd_bytes;
-    struct spi_message cmd_message;
-
+    struct ssd1306_cmd cmd;
     u8 graphics_buf[SSD1306_GRAPHICS_BUF_SIZE];
 };
 
