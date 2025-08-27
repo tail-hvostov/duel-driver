@@ -47,15 +47,8 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
     if (!count) {
         return 0;
     }
-    if (filp->f_flags & O_NONBLOCK) {
-        if (ssd1306_device_trylock(device)) {
-            return -EAGAIN;
-        }
-    }
-    else {
-        if (ssd1306_device_lock_interruptible(device)) {
-            return -ERESTARTSYS;
-        }
+    if (ssd1306_device_lock_interruptible(device)) {
+        return -ERESTARTSYS;
     }
     graphics_buf = ssd1306_device_get_graphics_buf(device) + *f_pos;
     if (copy_from_user(graphics_buf, buf, count)) {
@@ -69,7 +62,7 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
     if (!(*fpos % SSD1306_DISPLAY_WIDTH)) {
         last_page -= 1;
     }
-    
+
     if (ssd1306_device_redraw_pages() < 0) {
         result = -EIO;
         *f_pos -= count;

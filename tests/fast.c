@@ -34,19 +34,6 @@ int main(int argc, const char* argv[]) {
     }
     close(fast);
 
-    puts("3. Writing 360 bytes with O_NONBLOCK.");
-    fast = open("/dev/duel1", O_WRONLY, O_NONBLOCK);
-    if (fast < 0) {
-        puts("The file did not open.");
-        goto fault;
-    }
-    if (360 != write(fast, buf, 360)) {
-        puts("Couldn't write 360 bytes.");
-        close(fast);
-        goto fault;
-    }
-    close(fast);
-
     puts("Success!");
     return 0;
 fault:
