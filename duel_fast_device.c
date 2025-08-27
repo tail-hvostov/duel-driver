@@ -1,6 +1,7 @@
 #include "duel_fast_device.h"
 #include "ssd1306/ssd1306_driver.h"
 #include "ssd1306/ssd1306_device.h"
+#include "ssd1306/ssd1306_graph.h"
 #include "duel_ops_access.h"
 
 static int fop_open(struct inode *inode, struct file *filp) {
@@ -50,7 +51,7 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
     if (ssd1306_device_lock_interruptible(device)) {
         return -ERESTARTSYS;
     }
-    graphics_buf = ssd1306_device_get_graphics_buf(device) + *f_pos;
+    graphics_buf = ssd1306_get_graphics_buf(device) + *f_pos;
     if (copy_from_user(graphics_buf, buf, count)) {
         result = -EFAULT;
         goto out;
@@ -63,7 +64,7 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
         last_page -= 1;
     }
 
-    if (ssd1306_device_redraw_pages(device, first_page, last_page)) {
+    if (ssd1306_redraw_pages(device, first_page, last_page)) {
         result = -EIO;
         *f_pos -= count;
         goto out;
