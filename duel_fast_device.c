@@ -75,12 +75,40 @@ out:
     return result;
 }
 
+ssize_t fop_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) {
+    struct spi_device* device = ssd1306_get_spi_device();
+    size_t remaining_bytes;
+    ssize_t result;
+    u8* graphics_buf;
+    if (!device) {
+        return -ENODEV;
+    }
+    remaining_bytes = SSD1306_GRAPHICS_BUF_SIZE - *f_pos;
+    count = (count > remaining_bytes) ? remaining_bytes : count;
+    if (!count) {
+        return 0;
+    }
+    if (ssd1306_device_lock_interruptible(device)) {
+        return -ERESTARTSYS;
+    }
+    graphics_buf = ssd1306_get_graphics_buf(device) + *f_pos;
+    if (copy_to_user(buf, graphics_buf, count)) {
+        result = -EFAULT;
+        goto out;
+    }
+    *f_pos += count;
+    result = count;
+out:
+    ssd1306_device_unlock(device);
+    return result;
+}
+
 static struct file_operations fops = {
     .owner = THIS_MODULE,
     .open = fop_open,
 	.release = fop_release,
 	.write = fop_write,
-	//.read = pscu_read
+	.read = fop_read
 };
 
 //Устанавливает NULL в случае неудачи.
