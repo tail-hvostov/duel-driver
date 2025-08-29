@@ -1,5 +1,7 @@
 #include "duel_simple_device.h"
 #include "ssd1306/ssd1306_driver.h"
+#include "ssd1306/ssd1306_device.h"
+#include "ssd1306/ssd1306_graph.h"
 #include "duel_ops_access.h"
 
 #define BYTE_SIZE 8
@@ -97,8 +99,6 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
     ssize_t result;
     unsigned int first_page, last_page;
 
-    u8* cur_page;
-    int outer;
     if (!device) {
         return -ENODEV;
     }
