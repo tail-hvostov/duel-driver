@@ -3,6 +3,7 @@
 #include "ssd1306/ssd1306_device.h"
 #include "ssd1306/ssd1306_graph.h"
 #include "duel_ops_access.h"
+#include "duel_debug.h"
 
 #define BYTE_SIZE 8
 #define OUTER_MASK 0x80
@@ -67,11 +68,11 @@ static inline void simple_write(const u8* buf, size_t count, const loff_t* f_pos
             //бита на нужную позицию. 
             //В mask я получаю величину вида 000y0000.
             //В page_start[cur_bit] мы изначально имеем величину вида xxxAxxxx.
-            //!(0x80 >> 3) = особой маске для зануления А.
+            //~(0x80 >> 3) = особой маске для зануления А.
             //page_start[cur_bit] & !(0x80 >> 3) = xxx0xxxx.
             //page_start[cur_bit] | mask = xxxyxxxx.
             mask = (outer & OUTER_MASK) >> (BYTE_SIZE - inner_bit - 1);
-            page_start[cur_bit] &= !(OUTER_MASK >> (BYTE_SIZE - inner_bit - 1));
+            page_start[cur_bit] &= ~(OUTER_MASK >> (BYTE_SIZE - inner_bit - 1));
             page_start[cur_bit] |= mask;
             outer = outer << 1;
             cur_bit += 1;
