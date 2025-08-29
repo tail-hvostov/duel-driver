@@ -89,7 +89,8 @@ static inline void simple_write(const u8* buf, size_t count, const loff_t* f_pos
     }
 
     *last_page = bit_line / 8;
-    if (!cur_bit) {
+    //Здесь был выход за границу массива.
+    if ((!cur_bit) && (!inner_bit)) {
         *last_page -= 1;
     }
 }
