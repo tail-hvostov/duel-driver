@@ -121,6 +121,26 @@ int check_buf2(void) {
         }
         pointer += 1;
     }
+    //Здесь закончилось B и началось D.
+    for (i = 0; i < 9; i++) {
+        if (*pointer != 0) {
+            return 0;
+        }
+        pointer += 1;
+    }
+    for (i = 0; i < 9 * 2; i++) {
+        if (*pointer != 0xFF) {
+            return 0;
+        }
+        pointer += 1;
+    }
+    //Здесь закончилось D.
+    for (i = 0; i < 72 * 3; i++) {
+        if (*pointer != 0xFF) {
+            return 0;
+        }
+        pointer += 1;
+    }
     return 1;
 }
 
