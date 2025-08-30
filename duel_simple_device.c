@@ -150,9 +150,11 @@ static inline void simple_read(u8* buf, size_t count, const loff_t* f_pos,
             //outer зануляем сразу, чтобы маски адекватно работали.
             //page_start[cur_bit] имеет значение вида xxxyxxxx.
             //0x80 >> (7 - inner_bit) - особая маска для получеения бита y.
-            //mask = page_start[cur_bit] & 00010000 = 000y0000.
+            //000y0000 << (7 - inner_bit) = y0000000.
             mask = page_start[cur_bit] & (OUTER_MASK >> (BYTE_SIZE - inner_bit - 1));
+            mask = mask << (BYTE_SIZE - inner_bit - 1);
             outer |= mask;
+            outer = outer >> 1;
             cur_bit += 1;
             if (cur_bit == SSD1306_DISPLAY_WIDTH) {
                 cur_bit = 0;
