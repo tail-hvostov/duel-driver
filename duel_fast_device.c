@@ -75,7 +75,7 @@ out:
     return result;
 }
 
-ssize_t fop_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) {
+static ssize_t fop_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) {
     struct spi_device* device = ssd1306_get_spi_device();
     size_t remaining_bytes;
     ssize_t result;

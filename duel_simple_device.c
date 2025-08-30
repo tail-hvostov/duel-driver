@@ -128,7 +128,7 @@ out:
     return result;
 }
 
-static inline void simple_read(const u8* buf, size_t count, const loff_t* f_pos,
+static inline void simple_read(u8* buf, size_t count, const loff_t* f_pos,
                                 struct spi_device* device) {
     unsigned int bit_line = (8 * *f_pos) / SSD1306_DISPLAY_WIDTH;
     //Горизонтальный бит.
@@ -168,11 +168,10 @@ static inline void simple_read(const u8* buf, size_t count, const loff_t* f_pos,
     }
 }
 
-ssize_t fop_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) {
+static ssize_t fop_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) {
     struct spi_device* device = ssd1306_get_spi_device();
     size_t remaining_bytes;
     ssize_t result;
-    u8* graphics_buf;
     if (!device) {
         return -ENODEV;
     }
@@ -184,7 +183,7 @@ ssize_t fop_read(struct file *filp, char __user *buf, size_t count, loff_t *f_po
     if (ssd1306_device_lock_interruptible(device)) {
         return -ERESTARTSYS;
     }
-    simple_read();
+    simple_read(usr_buf, count, f_pos, device);
     if (copy_to_user(buf, usr_buf, count)) {
         result = -EFAULT;
         goto out;
