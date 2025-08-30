@@ -8,7 +8,7 @@
 
 char buf[BUF_SIZE];
 
-int fill_ff(void) {
+/*int fill_ff(void) {
     int i;
     int fast;
     for (i = 0; i < 360; i++) {
@@ -25,7 +25,25 @@ int fill_ff(void) {
     }
     close(fast);
     return 0;
-} 
+}*/
+
+void simple_pic(void) {
+    char* pointer = buf;
+    int i;
+    for (i = 0; i < 72; i++) {
+        *pointer = 0xFF;
+        pointer += 1;
+    }
+    //9
+    for (i = 0; i < 9; i++) {
+        *pointer = 0xAA;
+        pointer += 1;
+    }
+    for (i = 0; i < 9 * 31; i++) {
+        *pointer = 0xFF;
+        pointer += 1;
+    }
+}
 
 int main(int argc, const char* argv[]) {
     int simple;
@@ -56,8 +74,16 @@ int main(int argc, const char* argv[]) {
     }
     close(simple);
 
-    if (fill_ff()) {
-        puts("Fast device doesn't work.");
+    puts("3. Simple writing, fast reading.");
+    simple_pic();
+    simple = open("/dev/duel2", O_WRONLY);
+    if (simple < 0) {
+        puts("The file did not open.");
+        goto fault;
+    }
+    if ((72 != write(simple, buf, 72)) || (288 != write(simple, buf +  72, 288))) {
+        puts("Couldn't write 360 bytes.");
+        close(simple);
         goto fault;
     }
 
