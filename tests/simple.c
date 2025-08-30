@@ -45,6 +45,37 @@ void simple_pic(void) {
     }
 }
 
+int check_buf(void) {
+    int i = 0;
+    char* pointer = buf;
+    for (i = 0; i < 72; i++) {
+        if (*pointer != 0xFF) {
+            return 0;
+        }
+        pointer += 1;
+    }
+    for (i = 0; i < 72; i++) {
+        if (i % 2 == 0) {
+            if (*pointer != 0xFF) {
+                return 0;
+            }
+        }
+        else {
+            if (*pointer != 0xFE) {
+                return 0;
+            }
+        }
+        pointer += 1;
+    }
+    for (i = 0; i < 72 * 3; i++) {
+        if (*pointer != 0xFF) {
+            return 0;
+        }
+        pointer += 1;
+    }
+    return 1;
+} 
+
 int main(int argc, const char* argv[]) {
     int simple, fast;
 
@@ -100,6 +131,10 @@ int main(int argc, const char* argv[]) {
         goto fault;
     }
     close(fast);
+    if (!check_buf()) {
+        puts("Buffer check failed.");
+        goto fault;
+    }
 
     puts("Success!");
     return 0;
