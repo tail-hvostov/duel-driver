@@ -8,25 +8,6 @@
 
 char buf[BUF_SIZE];
 
-/*int fill_ff(void) {
-    int i;
-    int fast;
-    for (i = 0; i < 360; i++) {
-        buf[i] = 0xFF;
-    }
-
-    fast = open("/dev/duel1", O_WRONLY);
-    if (fast < 0) {
-        return 1;
-    }
-    if (360 != write(fast, buf, 360)) {
-        close(fast);
-        return 2;
-    }
-    close(fast);
-    return 0;
-}*/
-
 void simple_pic(void) {
     char* pointer = buf;
     int i;
@@ -45,7 +26,24 @@ void simple_pic(void) {
     }
 }
 
-int check_buf(void) {
+void fast_pic(void) {
+    char* pointer = buf;
+    int i;
+    for (i = 0; i < 72; i++) {
+        *pointer = 0xBD;
+        pointer += 1;
+    }
+    for (i = 0; i < 72; i++) {
+        *pointer = 0xDB;
+        pointer += 1;
+    }
+    for (i = 0; i < 72 * 3; i++) {
+        *pointer = 0xFF;
+        pointer += 1;
+    }
+}
+
+int check_buf1(void) {
     int i = 0;
     char* pointer = buf;
     for (i = 0; i < 72; i++) {
@@ -131,10 +129,37 @@ int main(int argc, const char* argv[]) {
         goto fault;
     }
     close(fast);
-    if (!check_buf()) {
+    if (!check_buf1()) {
         puts("Buffer check failed.");
         goto fault;
     }
+
+    puts("4. Fast writing, simple reading.");
+    fast_pic();
+    simple = open("/dev/duel2", O_RDONLY);
+    if (simple < 0) {
+        puts("The file did not open.");
+        goto fault;
+    }
+    fast = open("/dev/duel1", O_WRONLY);
+    if (fast < 0) {
+        puts("The fast device doesn't work properly.");
+        close(simple);
+        goto fault;
+    }
+    if (360 != write(fast, buf, 360)) {
+        puts("Couldn't write 360 bytes.");
+        close(simple);
+        close(fast);
+        goto fault;
+    }
+    close(fast);
+    if ((289 != read(simple, buf, 289)) || (71 != read(simple, buf + 289, 71))) {
+        puts("Couldn't read 360 bytes.");
+        close(simple);
+        goto fault;
+    }
+    close(simple);
 
     puts("Success!");
     return 0;
