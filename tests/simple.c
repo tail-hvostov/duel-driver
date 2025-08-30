@@ -46,7 +46,7 @@ void simple_pic(void) {
 }
 
 int main(int argc, const char* argv[]) {
-    int simple;
+    int simple, fast;
 
     puts("1. Writing 360 bytes.");
     simple = open("/dev/duel2", O_WRONLY);
@@ -81,11 +81,25 @@ int main(int argc, const char* argv[]) {
         puts("The file did not open.");
         goto fault;
     }
-    if ((72 != write(simple, buf, 72)) || (288 != write(simple, buf +  72, 288))) {
-        puts("Couldn't write 360 bytes.");
+    fast = open("/dev/duel1", O_RDONLY);
+    if (fast < 0) {
+        puts("The fast device doesn't work properly.");
         close(simple);
         goto fault;
     }
+    if ((72 != write(simple, buf, 72)) || (288 != write(simple, buf +  72, 288))) {
+        puts("Couldn't write 360 bytes.");
+        close(simple);
+        close(fast);
+        goto fault;
+    }
+    close(simple);
+    if (360 != read(fast, buf, 360)) {
+        puts("Couldn't read 360 bytes.");
+        close(fast);
+        goto fault;
+    }
+    close(fast);
 
     puts("Success!");
     return 0;
