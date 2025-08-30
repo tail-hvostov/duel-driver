@@ -74,6 +74,48 @@ int check_buf1(void) {
     return 1;
 } 
 
+int check_buf2(void) {
+    int i = 0;
+    char* pointer = buf;
+    for (i = 0; i < 9; i++) {
+        if (*pointer != 0xFF) {
+            return 0;
+        }
+        pointer += 1;
+    }
+    for (i = 0; i < 9; i++) {
+        if (*pointer != 0) {
+            return 0;
+        }
+        pointer += 1;
+    }
+    for (i = 0; i < 9 * 4; i++) {
+        if (*pointer != 0xFF) {
+            return 0;
+        }
+        pointer += 1;
+    }
+    for (i = 0; i < 9; i++) {
+        if (*pointer != 0) {
+            return 0;
+        }
+        pointer += 1;
+    }
+    for (i = 0; i < 9; i++) {
+        if (*pointer != 0xFF) {
+            return 0;
+        }
+        pointer += 1;
+    }
+    for (i = 0; i < 9; i++) {
+        if (*pointer != 0) {
+            return 0;
+        }
+        pointer += 1;
+    }
+    return 1;
+}
+
 int main(int argc, const char* argv[]) {
     int simple, fast;
 
@@ -160,6 +202,10 @@ int main(int argc, const char* argv[]) {
         goto fault;
     }
     close(simple);
+    if (!check_buf2()) {
+        puts("Buffer check failed.");
+        goto fault;
+    }
 
     puts("Success!");
     return 0;
