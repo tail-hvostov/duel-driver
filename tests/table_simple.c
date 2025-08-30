@@ -72,6 +72,24 @@ void fill_buf(void) {
 }
 
 int main(int argc, const char* argv[]) {
+    int simple;
+
     fill_buf();
+    simple = open("/dev/duel2", O_WRONLY);
+    if (simple < 0) {
+        puts("The file did not open.");
+        goto fault;
+    }
+    if (360 != write(simple, buf, 360)) {
+        puts("Couldn't write 360 bytes.");
+        close(simple);
+        goto fault;
+    }
+    close(simple);
+
+    puts("Success");
     return 0;
+fault:
+    puts("Failure");
+    return 1;
 }
