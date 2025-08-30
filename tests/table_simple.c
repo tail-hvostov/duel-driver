@@ -2,6 +2,7 @@
 
 #define PIC_HEIGHT 40
 #define PIC_WIDTH 72
+#define BUF_LEN 360
 
 const char* picture[PIC_HEIGHT] = {
     "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
@@ -46,6 +47,31 @@ const char* picture[PIC_HEIGHT] = {
     "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
 };
 
+char buf[BUF_LEN];
+
+void fill_buf(void) {
+    int buf_i, col_i, line_i, bit_i;
+    char buf_byte;
+    col_i = 0;
+    line_i = 0;
+    for (buf_i = 0; buf_i < BUF_LEN; buf_i++) {
+        buf_byte = 0;
+        for (bit_i = 0; bit_i < 8; bit_i++) {
+            buf_byte = buf_byte << 1;
+            if (picture[line_i][col_i] == 'I') {
+                buf_byte |= 1;
+            }
+            col_i++;
+            if (col_i == PIC_WIDTH) {
+                col_i = 0;
+                line_i += 1;
+            }
+        }
+        buf[buf_i] = buf_byte;
+    }
+}
+
 int main(int argc, const char* argv[]) {
+    fill_buf();
     return 0;
 }
