@@ -72,7 +72,7 @@ void fill_buf(void) {
         col_i += 1;
         if (col_i == PIC_WIDTH) {
             col_i = 0;
-            line_i += 1;
+            line_i += 8;
         }
     }
 }
