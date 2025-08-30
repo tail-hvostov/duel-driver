@@ -1,4 +1,8 @@
+#include <fcntl.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
 
 #define PIC_HEIGHT 40
 #define PIC_WIDTH 72
