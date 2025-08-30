@@ -128,12 +128,80 @@ out:
     return result;
 }
 
+static inline void simple_read(const u8* buf, size_t count, const loff_t* f_pos,
+                                struct spi_device* device) {
+    unsigned int bit_line = (8 * *f_pos) / SSD1306_DISPLAY_WIDTH;
+    //Горизонтальный бит.
+    unsigned int cur_bit = (8 * *f_pos) % SSD1306_DISPLAY_WIDTH;
+    size_t outer_i;
+    u8 outer;
+    u8 inner_bit;
+    u8 bit_i;
+    u8* page_start;
+    u8 mask;
+
+    //Вертикальный бит
+    inner_bit = bit_line % 8;
+    page_start = ssd1306_get_graphics_buf(device) + (bit_line / 8) * SSD1306_DISPLAY_WIDTH;
+    for (outer_i = 0; outer_i < count; outer_i++) {
+        outer = 0;
+        for (bit_i = 0; bit_i < BYTE_SIZE; bit_i++) {
+            //Разберём случай для inner_bit = 4.
+            //outer зануляем сразу, чтобы маски адекватно работали.
+            //page_start[cur_bit] имеет значение вида xxxyxxxx.
+            //0x80 >> (7 - inner_bit) - особая маска для получеения бита y.
+            //mask = page_start[cur_bit] & 00010000 = 000y0000.
+            mask = page_start[cur_bit] & (OUTER_MASK >> (BYTE_SIZE - inner_bit - 1));
+            outer |= mask;
+            cur_bit += 1;
+            if (cur_bit == SSD1306_DISPLAY_WIDTH) {
+                cur_bit = 0;
+                inner_bit += 1;
+                bit_line += 1;
+                if (inner_bit == BYTE_SIZE) {
+                    inner_bit = 0;
+                    page_start += SSD1306_DISPLAY_WIDTH;
+                }
+            }
+        }
+        buf[outer_i] = outer;
+    }
+}
+
+ssize_t fop_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) {
+    struct spi_device* device = ssd1306_get_spi_device();
+    size_t remaining_bytes;
+    ssize_t result;
+    u8* graphics_buf;
+    if (!device) {
+        return -ENODEV;
+    }
+    remaining_bytes = SSD1306_GRAPHICS_BUF_SIZE - *f_pos;
+    count = (count > remaining_bytes) ? remaining_bytes : count;
+    if (!count) {
+        return 0;
+    }
+    if (ssd1306_device_lock_interruptible(device)) {
+        return -ERESTARTSYS;
+    }
+    simple_read();
+    if (copy_to_user(buf, usr_buf, count)) {
+        result = -EFAULT;
+        goto out;
+    }
+    *f_pos += count;
+    result = count;
+out:
+    ssd1306_device_unlock(device);
+    return result;
+}
+
 static struct file_operations fops = {
     .owner = THIS_MODULE,
     .open = fop_open,
 	.release = fop_release,
 	.write = fop_write,
-	//.read = pscu_read
+	.read = fop_read
 };
 
 //Устанавливает NULL в случае неудачи.
