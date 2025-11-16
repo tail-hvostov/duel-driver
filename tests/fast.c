@@ -32,7 +32,7 @@ int check_buf(void) {
 int check_buf2(void) {
     int i;
     char val = 180;
-    for (i = 180; i < 360; i++) {
+    for (i = 0; i < 180; i++) {
         if (val != buf[i]) {
             return 0;
         }
