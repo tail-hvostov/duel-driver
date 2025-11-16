@@ -29,6 +29,18 @@ int check_buf(void) {
     return 1;
 }
 
+int check_buf2(void) {
+    int i;
+    char val = 180;
+    for (i = 180; i < 360; i++) {
+        if (val != buf[i]) {
+            return 0;
+        }
+        val++;
+    }
+    return 1;
+}
+
 int main(int argc, const char* argv[]) {
     int fast;
 
@@ -105,6 +117,33 @@ int main(int argc, const char* argv[]) {
         goto fault;
     }
     if (!check_buf()) {
+        puts("Buffer check failed.");
+        goto fault;
+    }
+    close(fast);
+
+    puts("5. Read & write & seek test.");
+    fast = open("/dev/duel1", O_WRONLY);
+    if (fast < 0) {
+        puts("The file did not open.");
+        goto fault;
+    }
+    fill_buf();
+    if (360 != write(fast, buf, 360)) {
+        puts("Couldn't write 360 bytes.");
+        close(fast);
+        goto fault;
+    }
+    close(fast);
+    fast = open("/dev/duel1", O_RDONLY);
+    memset(buf, 0, 360);
+    lseek(fast, 180, SEEK_SET);
+    if (180 != read(fast, buf, 180)) {
+        puts("Couldn't read 180 bytes.");
+        close(fast);
+        goto fault;
+    }
+    if (!check_buf2()) {
         puts("Buffer check failed.");
         goto fault;
     }
