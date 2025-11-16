@@ -34,6 +34,7 @@ int check_buf2(void) {
     char val = 180;
     for (i = 0; i < 180; i++) {
         if (val != buf[i]) {
+            printf("i=%d   val=%d   buf[i]=%d", i, val, buf[i]);
             return 0;
         }
         val++;
@@ -137,7 +138,12 @@ int main(int argc, const char* argv[]) {
     close(fast);
     fast = open("/dev/duel1", O_RDONLY);
     memset(buf, 0, 360);
-    lseek(fast, 180, SEEK_SET);
+    if ((off_t)-1 == lseek(fast, 180, SEEK_SET)) {
+        puts("Unsuccessful lseek call.");
+        printf("Errno=%d.\n", errno);
+        close(fast);
+        goto fault;
+    }
     if (180 != read(fast, buf, 180)) {
         puts("Couldn't read 180 bytes.");
         close(fast);
