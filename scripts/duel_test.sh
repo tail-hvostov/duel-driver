@@ -4,5 +4,5 @@ do
     name=$(basename --suffix=".out" $test)
     echo "Test $counter: $name"
     counter=$((counter + 1))
-    sudo $test
+    $test
 done
