@@ -179,108 +179,123 @@ int check_buf4(void) {
     return 1;
 }
 
-int main(int argc, const char* argv[]) {
-    int simple, fast;
-
+int test1() {
+    int simple;
     puts("1. Writing 360 bytes.");
     simple = open("/dev/duel2", O_WRONLY);
     if (simple < 0) {
         puts("The file did not open.");
-        goto fault;
+        return 0;
     }
     if (360 != write(simple, buf, 360)) {
         puts("Couldn't write 360 bytes.");
         close(simple);
-        goto fault;
+        return 0;
     }
     close(simple);
+    return 1;
+}
 
+int test2() {
+    int simple;
     puts("2. Attempting to write 400 bytes.");
     simple = open("/dev/duel2", O_WRONLY);
     if (simple < 0) {
         puts("The file did not open.");
-        goto fault;
+        return 0;
     }
     if (BUF_SIZE == write(simple, buf, BUF_SIZE)) {
         puts("400 bytes were written.");
         close(simple);
-        goto fault;
+        return 0;
     }
     close(simple);
+    return 1;
+}
 
+int test3() {
+    int simple, fast;
     puts("3. Simple writing, fast reading.");
     simple_pic();
     simple = open("/dev/duel2", O_WRONLY);
     if (simple < 0) {
         puts("The file did not open.");
-        goto fault;
+        return 0;
     }
     fast = open("/dev/duel1", O_RDONLY);
     if (fast < 0) {
         puts("The fast device doesn't work properly.");
         close(simple);
-        goto fault;
+        return 0;
     }
     if ((72 != write(simple, buf, 72)) || (288 != write(simple, buf +  72, 288))) {
         puts("Couldn't write 360 bytes.");
         close(simple);
         close(fast);
-        goto fault;
+        return 0;
     }
     close(simple);
     if (360 != read(fast, buf, 360)) {
         puts("Couldn't read 360 bytes.");
         close(fast);
-        goto fault;
+        return 0;
     }
     close(fast);
     if (!check_buf1()) {
         puts("Buffer check failed.");
-        goto fault;
+        return 0;
     }
+    return 1;
+}
 
+int test4() {
+    int simple, fast;
     puts("4. Fast writing, simple reading.");
     fast_pic();
     simple = open("/dev/duel2", O_RDONLY);
     if (simple < 0) {
         puts("The file did not open.");
-        goto fault;
+        return 0;
     }
     fast = open("/dev/duel1", O_WRONLY);
     if (fast < 0) {
         puts("The fast device doesn't work properly.");
         close(simple);
-        goto fault;
+        return 0;
     }
     if (360 != write(fast, buf, 360)) {
         puts("Couldn't write 360 bytes.");
         close(simple);
         close(fast);
-        goto fault;
+        return 0;
     }
     close(fast);
     if ((289 != read(simple, buf, 289)) || (71 != read(simple, buf + 289, 71))) {
         puts("Couldn't read 360 bytes.");
         close(simple);
-        goto fault;
+        return 0;
     }
     close(simple);
     if (!check_buf2()) {
         puts("Buffer check failed.");
-        goto fault;
+        return 0;
     }
+    return 1;
+}
 
+int test5() {
+    int simple;
     puts("5. Simple writing, simple reading.");
     simple = open("/dev/duel2", O_WRONLY);
     if (simple < 0) {
         puts("The file did not open.");
-        goto fault;
+        return 0;
     }
     fill_buf();
     if (360 != write(simple, buf, 360)) {
         puts("Couldn't write 360 bytes.");
         close(simple);
-        goto fault;
+        return 0;
     }
     close(simple);
     simple = open("/dev/duel2", O_RDONLY);
@@ -288,25 +303,29 @@ int main(int argc, const char* argv[]) {
     if (360 != read(simple, buf, 360)) {
         puts("Couldn't read 360 bytes.");
         close(simple);
-        goto fault;
+        return 0;
     }
     if (!check_buf4()) {
         puts("Buffer check failed.");
-        goto fault;
+        return 0;
     }
     close(simple);
+    return 1;
+}
 
+int test6() {
+    int simple;
     puts("6. Read & write & seek test.");
     simple = open("/dev/duel2", O_WRONLY);
     if (simple < 0) {
         puts("The file did not open.");
-        goto fault;
+        return 0;
     }
     fill_buf();
     if (360 != write(simple, buf, 360)) {
         puts("Couldn't write 360 bytes.");
         close(simple);
-        goto fault;
+        return 0;
     }
     close(simple);
     simple = open("/dev/duel2", O_RDONLY);
@@ -315,23 +334,30 @@ int main(int argc, const char* argv[]) {
         puts("Unsuccessful lseek call.");
         printf("Errno=%d.\n", errno);
         close(simple);
-        goto fault;
+        return 0;
     }
     if (180 != read(simple, buf, 180)) {
         puts("Couldn't read 180 bytes.");
         close(simple);
-        goto fault;
+        return 0;
     }
     if (!check_buf3()) {
         puts("Buffer check failed.");
         close(simple);
-        goto fault;
+        return 0;
     }
     close(simple);
-
-    puts("Success!");
-    return 0;
-fault:
-    puts("Failure!");
     return 1;
+}
+
+int main(int argc, const char* argv[]) {
+    int result = test1() && test2() && test3() && test4() && test5() && test6();
+    if (result) {
+        puts("Success!");
+        return 0;
+    }
+    else {
+        puts("Failure!");
+        return 1;
+    }
 }
