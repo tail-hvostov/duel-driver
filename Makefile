@@ -26,3 +26,18 @@ all:
 
 clean:
 	make -C $(KERNEL_DIR) M=$(PWD) clean
+
+TESTS_DIR = tests
+TESTS_SRC = $(wildcard $(TESTS_DIR)/*.c)
+TESTS_OUT = $(patsubst $(TESTS_DIR)/%.c,$(TESTS_DIR)/compiled/%.out,$(TESTS_SRC))
+
+tests: $(TESTS_OUT)
+
+$(TESTS_DIR)/compiled/%.out: $(TESTS_DIR)/%.c
+	@mkdir -p $(TESTS_DIR)/compiled
+	$(CC) $< -o $@
+
+clean-tests:
+	rm -rf $(TESTS_DIR)/compiled
+
+.PHONY: tests run-tests clean-tests
