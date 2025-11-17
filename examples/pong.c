@@ -4,14 +4,14 @@
 #include <string.h>
 #include <fcntl.h>
 
-#define FRAME_TIMEOUT 100000
+#define FRAME_TIMEOUT 60000
 #define BRICK_HEIGHT 12
 #define BRICK_HOR_MARGIN 4
 #define SCREEN_WIDTH 72
 #define SCREEN_HEIGHT 40
 #define SCREEN_MEMORY (SCREEN_HEIGHT * SCREEN_WIDTH / 8)
 #define SCREEN_PAGES (SCREEN_HEIGHT / 8)
-#define BRICK_SHIFT 4
+#define BRICK_SHIFT 3
 
 struct termios old_termios;
 struct termios game_termios;
