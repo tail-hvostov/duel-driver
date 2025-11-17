@@ -12,6 +12,7 @@
 #define SCREEN_MEMORY (SCREEN_HEIGHT * SCREEN_WIDTH / 8)
 #define SCREEN_PAGES (SCREEN_HEIGHT / 8)
 #define BRICK_SHIFT 3
+#define BALL_SIZE 2
 
 struct termios old_termios;
 struct termios game_termios;
@@ -19,11 +20,15 @@ int fast;
 
 int brick1_y;
 int brick2_y;
+int ball_x;
+int ball_y;
 char buf[SCREEN_MEMORY];
 
 void init_game() {
     brick1_y = (SCREEN_HEIGHT - BRICK_HEIGHT) / 2;
     brick2_y = brick1_y;
+    ball_x = (SCREEN_WIDTH - BALL_SIZE) / 2;
+    ball_y = (SCREEN_HEIGHT - BALL_SIZE) / 2;
 }
 
 void draw_brick(int brick_y, char* offset) {
@@ -35,13 +40,15 @@ void draw_brick(int brick_y, char* offset) {
     cur_byte += (SCREEN_WIDTH * start_page);
     int start_y = brick_y  % 8;
     int start_taken = 8 - start_y;
+    #if BRICK_HEIGHT <= 8
     if (BRICK_HEIGHT > start_taken) {
         *cur_byte = 0xFF << start_y;
     }
-    #if BRICK_HEIGHT <= 8
     else {
         *cur_byte = ((0xFF << (8 - BRICK_HEIGHT)) >> (8 - BRICK_HEIGHT)) << start_y;
     }
+    #else
+    *cur_byte = 0xFF << start_y;
     #endif
     cur_byte += SCREEN_WIDTH;
     for (int i = start_page + 1; i < stop_page; i++) {
@@ -54,6 +61,36 @@ void draw_brick(int brick_y, char* offset) {
     }
 }
 
+void draw_ball() {
+    int start_page, stop_page;
+    char* cur_byte;
+    start_page = ball_y / 8;
+    stop_page = (ball_y + BALL_SIZE) / 8;
+    cur_byte = buf + ball_x;
+    cur_byte += (SCREEN_WIDTH * start_page);
+    int start_y = ball_y  % 8;
+    int start_taken = 8 - start_y;
+    #if BALL_SIZE <= 8
+    if (BRICK_HEIGHT > start_taken) {
+        *cur_byte = 0xFF << start_y;
+    }
+    else {
+        *cur_byte = ((0xFF << (8 - BALL_SIZE)) >> (8 - BALL_SIZE)) << start_y;
+    }
+    #else
+    *cur_byte = 0xFF << start_y;
+    #endif
+    cur_byte += SCREEN_WIDTH;
+    for (int i = start_page + 1; i < stop_page; i++) {
+        *cur_byte = 0xFF;
+        cur_byte += SCREEN_WIDTH;
+    }
+    if (stop_page > start_page) {
+        int stop_taken = (BALL_SIZE - start_taken) % 8;
+        *cur_byte = 0xFF >> (8 - stop_taken);
+    }
+}
+
 void draw_bricks() {
     draw_brick(brick1_y, buf + BRICK_HOR_MARGIN);
     draw_brick(brick2_y, buf + (SCREEN_WIDTH - 1 - BRICK_HOR_MARGIN));
@@ -62,6 +99,7 @@ void draw_bricks() {
 void paint() {
     memset(buf, 0, SCREEN_MEMORY);
     draw_bricks();
+    draw_ball();
     lseek(fast, 0, SEEK_SET);
     write(fast, buf, SCREEN_MEMORY);
 }
