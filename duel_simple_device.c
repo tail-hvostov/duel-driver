@@ -17,7 +17,6 @@ static int fop_open(struct inode *inode, struct file *filp) {
     unsigned long access = 0;
     int result;
     struct duel_simple_filp_data* filp_data;
-    PDEBUG("Simple open");
     if (!device) {
         return -ENODEV;
     }
@@ -101,7 +100,6 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
     size_t remaining_bytes;
     ssize_t result;
     unsigned int first_page, last_page;
-    PDEBUG("Simple write");
     if (!device) {
         return -ENODEV;
     }
@@ -134,8 +132,6 @@ static inline void simple_read(u8* buf, size_t count, const loff_t* f_pos,
     unsigned int bit_line = (8 * *f_pos) / SSD1306_DISPLAY_WIDTH;
     //Горизонтальный бит.
     unsigned int cur_bit = (8 * *f_pos) % SSD1306_DISPLAY_WIDTH;
-    PDEBUG("HERE");
-    PDEBUG("bit_line=%u   cur_bit=%u", bit_line, cur_bit);
     size_t outer_i;
     u8 outer;
     u8 inner_bit;
@@ -152,10 +148,8 @@ static inline void simple_read(u8* buf, size_t count, const loff_t* f_pos,
             //outer зануляем сразу, чтобы маски адекватно работали.
             //page_start[cur_bit] имеет значение вида xxxyxxxx.
             //0x80 >> (7 - inner_bit) - особая маска для получеения бита y.
-            //000y0000 << (7 - inner_bit) = y0000000.
+            //000y0000 >> inner_bit = 0000000y.
             mask = page_start[cur_bit] & (OUTER_MASK >> (BYTE_SIZE - inner_bit - 1));
-            //mask = mask << (BYTE_SIZE - inner_bit - 1);
-            //outer = outer >> 1;
             mask = mask >> inner_bit;
             outer = outer << 1;
             outer |= mask;
@@ -189,7 +183,6 @@ static ssize_t fop_read(struct file *filp, char __user *buf, size_t count, loff_
     if (ssd1306_device_lock_interruptible(device)) {
         return -ERESTARTSYS;
     }
-    PDEBUG("Simple read");
     simple_read(usr_buf, count, f_pos, device);
     if (copy_to_user(buf, usr_buf, count)) {
         result = -EFAULT;
