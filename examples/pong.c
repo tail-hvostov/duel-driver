@@ -1,6 +1,8 @@
 #include <termios.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
 
 #define FRAME_TIMEOUT 100000
 #define BRICK_HEIGHT 6
