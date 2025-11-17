@@ -40,4 +40,17 @@ $(TESTS_DIR)/compiled/%.out: $(TESTS_DIR)/%.c
 clean-tests:
 	rm -rf $(TESTS_DIR)/compiled
 
-.PHONY: tests run-tests clean-tests
+EXAMPLES_DIR = examples
+EXAMPLES_SRC = $(wildcard $(EXAMPLES_DIR)/*.c)
+EXAMPLES_OUT = $(patsubst $(EXAMPLES_DIR)/%.c,$(EXAMPLES_DIR)/compiled/%.out,$(EXAMPLES_SRC))
+
+examples: $(EXAMPLES_OUT)
+
+$(EXAMPLES_DIR)/compiled/%.out: $(EXAMPLES_DIR)/%.c
+	@mkdir -p $(EXAMPLES_DIR)/compiled
+	$(CC) $< -o $@
+
+clean-examples:
+	rm -rf $(EXAMPLES_DIR)/compiled
+
+.PHONY: tests clean-tests examples clean-examples
