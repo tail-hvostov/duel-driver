@@ -72,22 +72,22 @@ void draw_ball() {
     int start_taken = 8 - start_y;
     #if BALL_SIZE <= 8
     if (BRICK_HEIGHT > start_taken) {
-        *cur_byte = 0xFF << start_y;
+        memset(cur_byte, 0xFF << start_y, BALL_SIZE);
     }
     else {
-        *cur_byte = ((0xFF << (8 - BALL_SIZE)) >> (8 - BALL_SIZE)) << start_y;
+        memset(cur_byte, (((0xFF << (8 - BALL_SIZE)) >> (8 - BALL_SIZE)) << start_y), BALL_SIZE);
     }
     #else
-    *cur_byte = 0xFF << start_y;
+    memset(cur_byte, 0xFF << start_y, BALL_SIZE);
     #endif
     cur_byte += SCREEN_WIDTH;
     for (int i = start_page + 1; i < stop_page; i++) {
-        *cur_byte = 0xFF;
+        memset(cur_byte, 0xFF, BALL_SIZE);
         cur_byte += SCREEN_WIDTH;
     }
     if (stop_page > start_page) {
         int stop_taken = (BALL_SIZE - start_taken) % 8;
-        *cur_byte = 0xFF >> (8 - stop_taken);
+        memset(cur_byte, 0xFF >> (8 - stop_taken), BALL_SIZE);
     }
 }
 
