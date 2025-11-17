@@ -30,7 +30,7 @@ void draw_bricks() {
     int start_page, stop_page;
     char* cur_byte;
     start_page = brick1_y / 8;
-    stop_page = (brick1_y + BRICK_HEIGHT - 1) / 8;
+    stop_page = (brick1_y + BRICK_HEIGHT) / 8;
     cur_byte = buf + BRICK_HOR_MARGIN;
     cur_byte += (SCREEN_WIDTH * start_page);
     int start_y = brick1_y  % 8;
@@ -57,6 +57,7 @@ void draw_bricks() {
 void paint() {
     memset(buf, 0, SCREEN_MEMORY);
     draw_bricks();
+    lseek(fast, 0, SEEK_SET);
     write(fast, buf, SCREEN_MEMORY);
 }
 
