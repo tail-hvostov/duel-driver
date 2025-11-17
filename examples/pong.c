@@ -5,7 +5,7 @@
 #include <fcntl.h>
 
 #define FRAME_TIMEOUT 100000
-#define BRICK_HEIGHT 6
+#define BRICK_HEIGHT 12
 #define BRICK_HOR_MARGIN 4;
 #define SCREEN_WIDTH 72
 #define SCREEN_HEIGHT 40
@@ -36,11 +36,13 @@ void draw_bricks() {
     int start_y = brick1_y  % 8;
     int start_taken = 8 - start_y;
     if (BRICK_HEIGHT > start_taken) {
-        *cur_byte = 0xFF >> start_y;
+        *cur_byte = 0xFF << start_y;
     }
+    #if BRICK_HEIGHT <= 8
     else {
-        *cur_byte = ((0xFF >> (8 - BRICK_HEIGHT)) << (8 - BRICK_HEIGHT)) >> start_y;
+        *cur_byte = ((0xFF << (8 - BRICK_HEIGHT)) >> (8 - BRICK_HEIGHT)) << start_y;
     }
+    #endif
     cur_byte += SCREEN_WIDTH;
     for (int i = start_page + 1; i < stop_page; i++) {
         *cur_byte = 0xFF;
@@ -48,7 +50,7 @@ void draw_bricks() {
     }
     if (stop_page > start_page) {
         int stop_taken = (BRICK_HEIGHT - start_taken) % 8;
-        *cur_byte = 0xFF << (8 - stop_taken);
+        *cur_byte = 0xFF >> (8 - stop_taken);
     }
 }
 
