@@ -17,7 +17,7 @@
 #define BALL_SIZE 2
 #define BALL_START_SPEED 3
 #define BALL_MIN_SPEED 2
-#define BALL_MAX_SPEED 7
+#define BALL_MAX_SPEED 6
 
 struct termios old_termios;
 struct termios game_termios;
@@ -145,8 +145,25 @@ void move_brick_down(int* brick_y) {
 }
 
 void move_ball() {
+    int old_x, old_y;
+    old_x = ball_x;
+    old_y = ball_y;
     ball_x += ball_vx;
     ball_y += ball_vy;
+    if (ball_x <= BRICK_HOR_MARGIN) {
+        int mid_y = (old_y + ball_y) / 2;
+        if ((mid_y + BALL_SIZE >= brick1_y) || (mid_y <= brick1_y + BRICK_HEIGHT)) {
+            ball_vx = rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED;
+            ball_x = BRICK_HOR_MARGIN + 1;
+        }
+    }
+    else if (ball_x >= SCREEN_WIDTH - 1 - BRICK_HOR_MARGIN) {
+        int mid_y = (old_y + ball_y) / 2;
+        if ((mid_y + BALL_SIZE >= brick2_y) || (mid_y <= brick2_y + BRICK_HEIGHT)) {
+            ball_vx = -(rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED);
+            ball_x = BRICK_HOR_MARGIN + 1;
+        }
+    }
 }
 
 int main(int argc, const char* argv[]) {
@@ -187,6 +204,7 @@ int main(int argc, const char* argv[]) {
                 break;
             }
         }
+        move_ball();
         paint();
         usleep(FRAME_TIMEOUT);
     }
