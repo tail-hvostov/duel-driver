@@ -158,7 +158,8 @@ int check_buf3(void) {
     char val = 180;
     for (i = 0; i < 180; i++) {
         if (val != buf[i]) {
-            printf("i=%d   val=%d   buf[i]=%d", i, val, buf[i]);
+            printf("i=%d   val=%d   buf[i]=%d\n", i, val, buf[i]);
+            printf("buf[1]=%d   buf[179]=%d\n", buf[1], buf[179]);
             return 0;
         }
         val++;
@@ -283,7 +284,7 @@ int main(int argc, const char* argv[]) {
         close(simple);
         goto fault;
     }
-    if (!check_buf2()) {
+    if (!check_buf3()) {
         puts("Buffer check failed.");
         close(simple);
         goto fault;
