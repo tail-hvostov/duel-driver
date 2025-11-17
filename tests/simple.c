@@ -144,6 +144,28 @@ int check_buf2(void) {
     return 1;
 }
 
+void fill_buf(void) {
+    int i;
+    char val = 0;
+    for (i = 0; i < 360; i++) {
+        buf[i] = val;
+        val++;
+    }
+}
+
+int check_buf3(void) {
+    int i;
+    char val = 180;
+    for (i = 0; i < 180; i++) {
+        if (val != buf[i]) {
+            printf("i=%d   val=%d   buf[i]=%d", i, val, buf[i]);
+            return 0;
+        }
+        val++;
+    }
+    return 1;
+}
+
 int main(int argc, const char* argv[]) {
     int simple, fast;
 
@@ -234,6 +256,39 @@ int main(int argc, const char* argv[]) {
         puts("Buffer check failed.");
         goto fault;
     }
+
+    puts("5. Read & write & seek test.");
+    simple = open("/dev/duel2", O_WRONLY);
+    if (simple < 0) {
+        puts("The file did not open.");
+        goto fault;
+    }
+    fill_buf();
+    if (360 != write(simple, buf, 360)) {
+        puts("Couldn't write 360 bytes.");
+        close(simple);
+        goto fault;
+    }
+    close(simple);
+    simple = open("/dev/duel2", O_RDONLY);
+    memset(buf, 0, 360);
+    if ((off_t)-1 == lseek(simple, 180, SEEK_SET)) {
+        puts("Unsuccessful lseek call.");
+        printf("Errno=%d.\n", errno);
+        close(simple);
+        goto fault;
+    }
+    if (180 != read(simple, buf, 180)) {
+        puts("Couldn't read 180 bytes.");
+        close(simple);
+        goto fault;
+    }
+    if (!check_buf2()) {
+        puts("Buffer check failed.");
+        close(simple);
+        goto fault;
+    }
+    close(simple);
 
     puts("Success!");
     return 0;

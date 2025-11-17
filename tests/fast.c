@@ -151,6 +151,7 @@ int main(int argc, const char* argv[]) {
     }
     if (!check_buf2()) {
         puts("Buffer check failed.");
+        close(fast);
         goto fault;
     }
     close(fast);
