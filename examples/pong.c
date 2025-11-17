@@ -71,7 +71,7 @@ void draw_ball() {
     int start_y = ball_y  % 8;
     int start_taken = 8 - start_y;
     #if BALL_SIZE <= 8
-    if (BRICK_HEIGHT > start_taken) {
+    if (BALL_SIZE > start_taken) {
         memset(cur_byte, 0xFF << start_y, BALL_SIZE);
     }
     else {
