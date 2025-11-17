@@ -10,4 +10,4 @@ do
     failed=$((failed+exit_code))
 done
 counter=$((counter - 1))
-echo "Failed $failed/$counter tests."
+echo "Failed $failed/$counter test suites."
