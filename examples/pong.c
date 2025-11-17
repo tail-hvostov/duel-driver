@@ -11,7 +11,7 @@
 #define SCREEN_HEIGHT 40
 #define SCREEN_MEMORY (SCREEN_HEIGHT * SCREEN_WIDTH / 8)
 #define SCREEN_PAGES (SCREEN_HEIGHT / 8)
-#define BRICK_SHIFT 4;
+#define BRICK_SHIFT 4
 
 struct termios old_termios;
 struct termios game_termios;
@@ -31,7 +31,8 @@ void draw_bricks() {
     char* cur_byte;
     start_page = brick1_y / 8;
     stop_page = (brick1_y + BRICK_HEIGHT - 1) / 8;
-    cur_byte = buf + BRICK_HOR_MARGIN + SCREEN_WIDTH * start_page;
+    cur_byte = buf + BRICK_HOR_MARGIN;
+    cur_byte += (SCREEN_WIDTH * start_page);
     int start_y = brick1_y  % 8;
     int start_taken = 8 - start_y;
     if (BRICK_HEIGHT > start_taken) {
