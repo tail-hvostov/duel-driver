@@ -11,6 +11,7 @@
 #define SCREEN_HEIGHT 40
 #define SCREEN_MEMORY (SCREEN_HEIGHT * SCREEN_WIDTH / 8)
 #define SCREEN_PAGES (SCREEN_HEIGHT / 8)
+#define BRICK_SHIFT 4;
 
 struct termios old_termios;
 struct termios game_termios;
@@ -78,6 +79,19 @@ int main(int argc, const char* argv[]) {
             switch (sym) {
             case 'p':
                 running = 0;
+                break;
+            case 'w':
+                brick1_y -= BRICK_SHIFT;
+                if (brick1_y < 0) {
+                    brick1_y = 0;
+                }
+                break;
+            case 's':
+                brick1_y += BRICK_SHIFT;
+                int delta = SCREEN_HEIGHT - BRICK_HEIGHT - brick1_y;
+                if (delta < 0) {
+                    brick1_y += delta;
+                }
                 break;
             }
         }
