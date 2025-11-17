@@ -34,12 +34,11 @@ void draw_bricks() {
     int start_y = brick1_y  % 8;
     if (BRICK_HEIGHT > (8 - start_y)) {
         *cur_byte = 0xFF >> start_y;
-        cur_byte += SCREEN_WIDTH;
     }
     else {
-        *cur_byte = (0xFF >> (8 - BRICK_HEIGHT)) << (start_y - l);
-        cur_byte += SCREEN_WIDTH;
+        *cur_byte = ((0xFF >> (8 - BRICK_HEIGHT)) << (8 - BRICK_HEIGHT)) >> start_y;
     }
+    cur_byte += SCREEN_WIDTH;
     for (int i = start_page + 1; i < stop_page; i++) {
         *cur_byte = 0xFF;
         cur_byte += SCREEN_WIDTH;
