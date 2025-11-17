@@ -161,7 +161,7 @@ void move_ball() {
         int mid_y = (old_y + ball_y) / 2;
         if ((mid_y + BALL_SIZE >= brick2_y) || (mid_y <= brick2_y + BRICK_HEIGHT)) {
             ball_vx = -(rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED);
-            ball_x = BRICK_HOR_MARGIN + 1;
+            ball_x = SCREEN_WIDTH - 2 - BRICK_HOR_MARGIN;
         }
     }
 }
