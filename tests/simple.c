@@ -299,6 +299,10 @@ int test5() {
         return 0;
     }
     close(simple);
+    for (int i = 0; i < 10; i++) {
+        printf("%d   ", buf[i]);
+    }
+    puts("\n");
     simple = open(SIMPLE_FILE, O_RDONLY);
     memset(buf, 0, 360);
     if (360 != read(simple, buf, 360)) {
@@ -306,6 +310,10 @@ int test5() {
         close(simple);
         return 0;
     }
+    for (int i = 0; i < 10; i++) {
+        printf("%d   ", buf[i]);
+    }
+    puts("\n");
     if (!check_buf4()) {
         puts("Buffer check failed.");
         return 0;

@@ -3,12 +3,14 @@
 #include "ssd1306/ssd1306_device.h"
 #include "ssd1306/ssd1306_graph.h"
 #include "duel_ops_access.h"
+#include "duel_debug.h"
 
 static int fop_open(struct inode *inode, struct file *filp) {
     struct spi_device* device = ssd1306_get_spi_device();
     unsigned long access = 0;
     int result;
     struct duel_fast_filp_data* filp_data;
+    PDEBUG("Fast open");
     if (!device) {
         return -ENODEV;
     }
@@ -40,6 +42,7 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
     ssize_t result;
     unsigned int first_page, last_page;
     u8* graphics_buf;
+    PDEBUG("Here");
     if (!device) {
         return -ENODEV;
     }
@@ -80,6 +83,7 @@ static ssize_t fop_read(struct file *filp, char __user *buf, size_t count, loff_
     size_t remaining_bytes;
     ssize_t result;
     u8* graphics_buf;
+    PDEBUG("Fast read");
     if (!device) {
         return -ENODEV;
     }
