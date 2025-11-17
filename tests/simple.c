@@ -5,6 +5,7 @@
 #include <string.h>
 
 #define BUF_SIZE 400
+#define SIMPLE_FILE "/dev/duel2"
 
 char buf[BUF_SIZE];
 
@@ -182,7 +183,7 @@ int check_buf4(void) {
 int test1() {
     int simple;
     puts("1. Writing 360 bytes.");
-    simple = open("/dev/duel2", O_WRONLY);
+    simple = open(SIMPLE_FILE, O_WRONLY);
     if (simple < 0) {
         puts("The file did not open.");
         return 0;
@@ -199,7 +200,7 @@ int test1() {
 int test2() {
     int simple;
     puts("2. Attempting to write 400 bytes.");
-    simple = open("/dev/duel2", O_WRONLY);
+    simple = open(SIMPLE_FILE, O_WRONLY);
     if (simple < 0) {
         puts("The file did not open.");
         return 0;
@@ -217,7 +218,7 @@ int test3() {
     int simple, fast;
     puts("3. Simple writing, fast reading.");
     simple_pic();
-    simple = open("/dev/duel2", O_WRONLY);
+    simple = open(SIMPLE_FILE, O_WRONLY);
     if (simple < 0) {
         puts("The file did not open.");
         return 0;
@@ -252,7 +253,7 @@ int test4() {
     int simple, fast;
     puts("4. Fast writing, simple reading.");
     fast_pic();
-    simple = open("/dev/duel2", O_RDONLY);
+    simple = open(SIMPLE_FILE, O_RDONLY);
     if (simple < 0) {
         puts("The file did not open.");
         return 0;
@@ -286,7 +287,7 @@ int test4() {
 int test5() {
     int simple;
     puts("5. Simple writing, simple reading.");
-    simple = open("/dev/duel2", O_WRONLY);
+    simple = open(SIMPLE_FILE, O_WRONLY);
     if (simple < 0) {
         puts("The file did not open.");
         return 0;
@@ -298,7 +299,7 @@ int test5() {
         return 0;
     }
     close(simple);
-    simple = open("/dev/duel2", O_RDONLY);
+    simple = open(SIMPLE_FILE, O_RDONLY);
     memset(buf, 0, 360);
     if (360 != read(simple, buf, 360)) {
         puts("Couldn't read 360 bytes.");
@@ -316,7 +317,7 @@ int test5() {
 int test6() {
     int simple;
     puts("6. Read & write & seek test.");
-    simple = open("/dev/duel2", O_WRONLY);
+    simple = open(SIMPLE_FILE, O_WRONLY);
     if (simple < 0) {
         puts("The file did not open.");
         return 0;
@@ -328,7 +329,7 @@ int test6() {
         return 0;
     }
     close(simple);
-    simple = open("/dev/duel2", O_RDONLY);
+    simple = open(SIMPLE_FILE, O_RDONLY);
     memset(buf, 0, 360);
     if ((off_t)-1 == lseek(simple, 180, SEEK_SET)) {
         puts("Unsuccessful lseek call.");
