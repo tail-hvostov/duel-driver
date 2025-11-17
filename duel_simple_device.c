@@ -106,7 +106,7 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
     }
     remaining_bytes = SSD1306_GRAPHICS_BUF_SIZE - *f_pos;
     count = (count > remaining_bytes) ? remaining_bytes : count;
-    if (!count) {
+    if (count <= 0) {
         return 0;
     }
     if (ssd1306_device_lock_interruptible(device)) {
@@ -179,7 +179,7 @@ static ssize_t fop_read(struct file *filp, char __user *buf, size_t count, loff_
     }
     remaining_bytes = SSD1306_GRAPHICS_BUF_SIZE - *f_pos;
     count = (count > remaining_bytes) ? remaining_bytes : count;
-    if (!count) {
+    if (count <= 0) {
         return 0;
     }
     if (ssd1306_device_lock_interruptible(device)) {
@@ -197,12 +197,35 @@ out:
     return result;
 }
 
+static loff_t fop_llseek(struct file *filp, loff_t off, int whence) {
+    loff_t newpos;
+    switch(whence) {
+    case SEEK_SET://0
+        newpos = off;
+        break;
+    case SEEK_CUR://1
+        newpos = filp->f_pos + off;
+        break;
+    case SEEK_END://2
+        newpos = SSD1306_GRAPHICS_BUF_SIZE + off;
+        break;
+    default:
+        return -EINVAL;
+    }
+    if (newpos < 0) {
+        return -EINVAL;
+    }
+    filp->f_pos = newpos;
+    return newpos;
+}
+
 static struct file_operations fops = {
     .owner = THIS_MODULE,
     .open = fop_open,
 	.release = fop_release,
 	.write = fop_write,
-	.read = fop_read
+	.read = fop_read,
+    .llseek = fop_llseek
 };
 
 //Устанавливает NULL в случае неудачи.
