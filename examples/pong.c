@@ -26,14 +26,14 @@ void init_game() {
     brick2_y = brick1_y;
 }
 
-void draw_bricks() {
+void draw_brick(int brick_y, char* offset) {
     int start_page, stop_page;
     char* cur_byte;
-    start_page = brick1_y / 8;
-    stop_page = (brick1_y + BRICK_HEIGHT) / 8;
-    cur_byte = buf + BRICK_HOR_MARGIN;
+    start_page = brick_y / 8;
+    stop_page = (brick_y + BRICK_HEIGHT) / 8;
+    cur_byte = offset;
     cur_byte += (SCREEN_WIDTH * start_page);
-    int start_y = brick1_y  % 8;
+    int start_y = brick_y  % 8;
     int start_taken = 8 - start_y;
     if (BRICK_HEIGHT > start_taken) {
         *cur_byte = 0xFF << start_y;
@@ -54,11 +54,31 @@ void draw_bricks() {
     }
 }
 
+void draw_bricks() {
+    draw_brick(brick1_y, buf + BRICK_HOR_MARGIN);
+    draw_brick(brick2_y, buf + (SCREEN_WIDTH - 1 - BRICK_HOR_MARGIN));
+}
+
 void paint() {
     memset(buf, 0, SCREEN_MEMORY);
     draw_bricks();
     lseek(fast, 0, SEEK_SET);
     write(fast, buf, SCREEN_MEMORY);
+}
+
+void move_brick_up(int* brick_y) {
+    *brick_y -= BRICK_SHIFT;
+    if (*brick_y < 0) {
+        *brick_y = 0;
+    }
+}
+
+void move_brick_down(int* brick_y) {
+    *brick_y += BRICK_SHIFT;
+    int delta = SCREEN_HEIGHT - BRICK_HEIGHT - *brick_y;
+    if (delta < 0) {
+        *brick_y += delta;
+    }
 }
 
 int main(int argc, const char* argv[]) {
@@ -81,21 +101,20 @@ int main(int argc, const char* argv[]) {
     while (running) {
         if (read(STDIN_FILENO, &sym, 1) > 0) {
             switch (sym) {
-            case 'p':
+            case '7':
                 running = 0;
                 break;
             case 'w':
-                brick1_y -= BRICK_SHIFT;
-                if (brick1_y < 0) {
-                    brick1_y = 0;
-                }
+                move_brick_up(&brick1_y);
                 break;
             case 's':
-                brick1_y += BRICK_SHIFT;
-                int delta = SCREEN_HEIGHT - BRICK_HEIGHT - brick1_y;
-                if (delta < 0) {
-                    brick1_y += delta;
-                }
+                move_brick_down(&brick1_y);
+                break;
+            case 'o':
+                move_brick_up(&brick2_y);
+                break;
+            case 'l':
+                move_brick_down(&brick2_y);
                 break;
             }
         }
