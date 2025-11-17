@@ -167,6 +167,18 @@ int check_buf3(void) {
     return 1;
 }
 
+int check_buf4(void) {
+    int i;
+    char val = 0;
+    for (i = 0; i < 360; i++) {
+        if (val != buf[i]) {
+            return 0;
+        }
+        val++;
+    }
+    return 1;
+}
+
 int main(int argc, const char* argv[]) {
     int simple, fast;
 
@@ -258,7 +270,33 @@ int main(int argc, const char* argv[]) {
         goto fault;
     }
 
-    puts("5. Read & write & seek test.");
+    puts("5. Simple writing, simple reading.");
+    simple = open("/dev/duel2", O_WRONLY);
+    if (simple < 0) {
+        puts("The file did not open.");
+        goto fault;
+    }
+    fill_buf();
+    if (360 != write(simple, buf, 360)) {
+        puts("Couldn't write 360 bytes.");
+        close(simple);
+        goto fault;
+    }
+    close(simple);
+    simple = open("/dev/duel2", O_RDONLY);
+    memset(buf, 0, 360);
+    if (360 != read(simple, buf, 360)) {
+        puts("Couldn't read 360 bytes.");
+        close(simple);
+        goto fault;
+    }
+    if (!check_buf4()) {
+        puts("Buffer check failed.");
+        goto fault;
+    }
+    close(simple);
+
+    puts("6. Read & write & seek test.");
     simple = open("/dev/duel2", O_WRONLY);
     if (simple < 0) {
         puts("The file did not open.");
