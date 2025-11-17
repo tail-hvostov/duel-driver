@@ -42,13 +42,18 @@ void draw_brick(int brick_y, char* offset) {
     int start_taken = 8 - start_y;
     #if BRICK_HEIGHT <= 8
     if (BRICK_HEIGHT > start_taken) {
-        *cur_byte = 0xFF << start_y;
+        *cur_byte = 0xFF;
+        *cur_byte <<= start_y;
     }
     else {
-        *cur_byte = ((0xFF << (8 - BRICK_HEIGHT)) >> (8 - BRICK_HEIGHT)) << start_y;
+        *cur_byte = 0xFF;
+        *cur_byte <<= 8 - BRICK_HEIGHT;
+        *cur_byte >>= 8 - BRICK_HEIGHT;
+        *cur_byte <<= start_y;
     }
     #else
-    *cur_byte = 0xFF << start_y;
+    *cur_byte = 0xFF;
+    *cur_byte <<= start_y;
     #endif
     cur_byte += SCREEN_WIDTH;
     for (int i = start_page + 1; i < stop_page; i++) {
@@ -57,7 +62,8 @@ void draw_brick(int brick_y, char* offset) {
     }
     if (stop_page > start_page) {
         int stop_taken = (BRICK_HEIGHT - start_taken) % 8;
-        *cur_byte = 0xFF >> (8 - stop_taken);
+        *cur_byte = 0xFF;
+        *cur_byte >>= 8 - stop_taken;
     }
 }
 
@@ -72,13 +78,21 @@ void draw_ball() {
     int start_taken = 8 - start_y;
     #if BALL_SIZE <= 8
     if (BALL_SIZE > start_taken) {
-        memset(cur_byte, 0xFF << start_y, BALL_SIZE);
+        char c = 0xFF;
+        c <<= start_y;
+        memset(cur_byte, c, BALL_SIZE);
     }
     else {
-        memset(cur_byte, (((0xFF << (8 - BALL_SIZE)) >> (8 - BALL_SIZE)) << start_y), BALL_SIZE);
+        char c = 0xFF;
+        c <<= 8 - BALL_SIZE;
+        c >>= 8 - BALL_SIZE;;
+        c <<= start_y;
+        memset(cur_byte, c, BALL_SIZE);
     }
     #else
-    memset(cur_byte, 0xFF << start_y, BALL_SIZE);
+    char c = 0xFF;
+    c <<= start_y;
+    memset(cur_byte, c, BALL_SIZE);
     #endif
     cur_byte += SCREEN_WIDTH;
     for (int i = start_page + 1; i < stop_page; i++) {
@@ -87,7 +101,9 @@ void draw_ball() {
     }
     if (stop_page > start_page) {
         int stop_taken = (BALL_SIZE - start_taken) % 8;
-        memset(cur_byte, 0xFF >> (8 - stop_taken), BALL_SIZE);
+        char c = 0xFF;
+        c >>= 8 - stop_taken;
+        memset(cur_byte, c, BALL_SIZE);
     }
 }
 
