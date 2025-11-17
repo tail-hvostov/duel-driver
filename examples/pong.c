@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define FRAME_TIMEOUT 60000
 #define BRICK_HEIGHT 12
@@ -13,6 +15,9 @@
 #define SCREEN_PAGES (SCREEN_HEIGHT / 8)
 #define BRICK_SHIFT 3
 #define BALL_SIZE 2
+#define BALL_START_SPEED 3
+#define BALL_MIN_SPEED 2
+#define BALL_MAX_SPEED 7
 
 struct termios old_termios;
 struct termios game_termios;
@@ -22,6 +27,8 @@ int brick1_y;
 int brick2_y;
 int ball_x;
 int ball_y;
+int ball_vx;
+int ball_vy;
 char buf[SCREEN_MEMORY];
 
 void init_game() {
@@ -29,6 +36,8 @@ void init_game() {
     brick2_y = brick1_y;
     ball_x = (SCREEN_WIDTH - BALL_SIZE) / 2;
     ball_y = (SCREEN_HEIGHT - BALL_SIZE) / 2;
+    ball_vx = BALL_START_SPEED - 2 * (rand() % 2)  * BALL_START_SPEED;
+    ball_vy = 0;
 }
 
 void draw_brick(int brick_y, char* offset) {
@@ -135,7 +144,13 @@ void move_brick_down(int* brick_y) {
     }
 }
 
+void move_ball() {
+    ball_x += ball_vx;
+    ball_y += ball_vy;
+}
+
 int main(int argc, const char* argv[]) {
+    srand(time(NULL));
     fast = open("/dev/duel1", O_WRONLY);
     if (fast < 0) {
         puts("The file did not open.");
