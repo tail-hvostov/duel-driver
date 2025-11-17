@@ -169,6 +169,9 @@ void move_ball() {
             ball_vy = rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED;
             ball_vy -= 2 * (rand() % 2) * ball_vy;
         }
+        else {
+            puts("Player 1 missed the ball.");
+        }
     }
     else if (ball_x + BALL_SIZE >= SCREEN_WIDTH - 1 - BRICK_HOR_MARGIN) {
         int mid_y = (old_y + ball_y) / 2;
@@ -177,6 +180,9 @@ void move_ball() {
             ball_x = SCREEN_WIDTH - BALL_SIZE - 2 - BRICK_HOR_MARGIN;
             ball_vy = rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED;
             ball_vy -= 2 * (rand() % 2) * ball_vy;
+        }
+        else {
+            puts("Player 2 missed the ball.");
         }
     }
 }
