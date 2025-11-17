@@ -17,7 +17,7 @@
 #define BALL_SIZE 2
 #define BALL_START_SPEED 3
 #define BALL_MIN_SPEED 2
-#define BALL_MAX_SPEED 6
+#define BALL_MAX_SPEED 5
 
 struct termios old_termios;
 struct termios game_termios;
@@ -148,20 +148,35 @@ void move_ball() {
     int old_x, old_y;
     old_x = ball_x;
     old_y = ball_y;
-    ball_x += ball_vx;
     ball_y += ball_vy;
+    if (ball_y < 0) {
+        ball_y = -ball_y;
+        ball_vy = -ball_vy;
+    }
+    else {
+        int delta = SCREEN_HEIGHT - BRICK_HEIGHT - ball_y;
+        if (delta < 0) {
+            ball_y += delta;
+            ball_vy = -ball_vy;
+        }
+    }
+    ball_x += ball_vx;
     if (ball_x <= BRICK_HOR_MARGIN) {
         int mid_y = (old_y + ball_y) / 2;
         if ((mid_y + BALL_SIZE >= brick1_y) || (mid_y <= brick1_y + BRICK_HEIGHT)) {
             ball_vx = rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED;
             ball_x = BRICK_HOR_MARGIN + 1;
+            //ball_vy = rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED;
+            //ball_vy -= 2 * (rand() % 2) * ball_vy;
         }
     }
-    else if (ball_x >= SCREEN_WIDTH - 1 - BRICK_HOR_MARGIN) {
+    else if (ball_x + BALL_SIZE >= SCREEN_WIDTH - 1 - BRICK_HOR_MARGIN) {
         int mid_y = (old_y + ball_y) / 2;
         if ((mid_y + BALL_SIZE >= brick2_y) || (mid_y <= brick2_y + BRICK_HEIGHT)) {
             ball_vx = -(rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED);
             ball_x = SCREEN_WIDTH - 2 - BRICK_HOR_MARGIN;
+            //ball_vy = rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED;
+            //ball_vy -= 2 * (rand() % 2) * ball_vy;
         }
     }
 }
