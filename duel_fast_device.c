@@ -103,6 +103,27 @@ out:
     return result;
 }
 
+static loff_t fop_llseek(struct file *filp, loff_t off, int whence) {
+    loff_t newpos;
+    switch(whence) {
+    case SEEK_SET://0
+        newpos = off;
+        break;
+    case SEEK_CUR://1
+        newpos = filp->f_pos + off;
+        break;
+    case SEEK_END://2
+        newpos = dev->size + off;
+        break;
+    default:
+        return -EINVAL;
+    }
+    if (newpos < 0) {
+        return -EINVAL;
+    }
+    return newpos;
+}
+
 static struct file_operations fops = {
     .owner = THIS_MODULE,
     .open = fop_open,
