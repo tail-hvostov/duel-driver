@@ -163,7 +163,7 @@ void move_ball() {
     ball_x += ball_vx;
     if (ball_x <= BRICK_HOR_MARGIN) {
         int mid_y = (old_y + ball_y) / 2;
-        if ((mid_y + BALL_SIZE >= brick1_y) || (mid_y <= brick1_y + BRICK_HEIGHT)) {
+        if ((mid_y + BALL_SIZE <= brick1_y + BRICK_HEIGHT) && (mid_y >= brick1_y)) {
             ball_vx = rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED;
             ball_x = BRICK_HOR_MARGIN + 1;
             ball_vy = rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED;
@@ -171,11 +171,12 @@ void move_ball() {
         }
         else {
             puts("Player 1 missed the ball.");
+            init_game();
         }
     }
     else if (ball_x + BALL_SIZE >= SCREEN_WIDTH - 1 - BRICK_HOR_MARGIN) {
         int mid_y = (old_y + ball_y) / 2;
-        if ((mid_y + BALL_SIZE >= brick2_y) || (mid_y <= brick2_y + BRICK_HEIGHT)) {
+        if ((mid_y + BALL_SIZE <= brick2_y + BRICK_HEIGHT) && (mid_y >= brick2_y)) {
             ball_vx = -(rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED);
             ball_x = SCREEN_WIDTH - BALL_SIZE - 2 - BRICK_HOR_MARGIN;
             ball_vy = rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED;
@@ -183,6 +184,7 @@ void move_ball() {
         }
         else {
             puts("Player 2 missed the ball.");
+            init_game();
         }
     }
 }
