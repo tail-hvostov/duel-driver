@@ -19,7 +19,8 @@ duel-objs :=    duel_main.o \
 				ssd1306/ssd1306_driver.o \
 				ssd1306/ssd1306_device.o \
 				ssd1306/ssd1306_cmd.o \
-				ssd1306/ssd1306_graph.o
+				ssd1306/ssd1306_graph.o \
+				duel_procfs.o
 
 all:
 	make -C $(KERNEL_DIR) M=$(PWD) modules

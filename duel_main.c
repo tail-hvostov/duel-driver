@@ -5,6 +5,7 @@
 #include "duel_fast_device.h"
 #include "duel_simple_device.h"
 #include "duel_str_device.h"
+#include "duel_procfs.h"
 #include "ssd1306/ssd1306_driver.h"
 
 #define CHARDEV_COUNT 3
@@ -22,6 +23,7 @@ static void duel_exit(void) {
     duel_free_fast_dev(fast_dev);
     duel_free_simple_dev(simple_dev);
     duel_free_str_dev(str_dev);
+    duel_exit_procfs();
     unregister_chrdev_region(devno, CHARDEV_COUNT);
     ssd1306_exit_driver();
 }
@@ -56,6 +58,12 @@ static int __init duel_init(void) {
         goto fault;
     }
     result = duel_alloc_str_dev(&str_dev, char_major, char_minor);
+    if (result) {
+        goto fault;
+    }
+
+    //Создане файла в procfs
+    result = duel_init_procfs();
     if (result) {
         goto fault;
     }
