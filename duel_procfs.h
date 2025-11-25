@@ -3,7 +3,7 @@
 
 #define DUEL_PROC_NAME "duel-params"
 
-extern int duel_init_procfs();
-extern void duel_exit_procfs();
+extern int duel_init_procfs(void);
+extern void duel_exit_procfs(void);
 
 #endif
