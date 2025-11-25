@@ -7,7 +7,6 @@
 static struct proc_dir_entry* proc_entry = NULL;
 static char* text_buf = NULL;
 static size_t text_buf_len = -1;
-static struct spi_device* prev_spi = NULL;
 
 static ssize_t proc_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) {
     struct spi_device* spi = ssd1306_get_spi_device();
@@ -19,11 +18,11 @@ static ssize_t proc_read(struct file *filp, char __user *buf, size_t count, loff
         return -ERESTARTSYS;
     }
     if (-1 == text_buf_len) {
-        sprintf(text_buf, "width:\nheight:\nmemory_mode: page");
+        sprintf(text_buf, "width:\nheight:\nmemory_mode: page\n");
         text_buf_len = strlen(text_buf);
     }
-    size_t remaining_bytes = text_buf_len - f_pos;
-    size_t count = (count > remaining_bytes) ? remaining_bytes : count;
+    size_t remaining_bytes = text_buf_len - *f_pos;
+    count = (count > remaining_bytes) ? remaining_bytes : count;
     if (copy_to_user(buf, text_buf + *f_pos, count)) {
         result = -EFAULT;
         goto ending;
