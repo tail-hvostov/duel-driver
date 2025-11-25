@@ -68,3 +68,9 @@ inline int ssd1306_redraw_pages(struct spi_device* spi, unsigned int first,
     }
     return result;
 }
+
+inline int ssd1306_reset_graphics_buf(struct spi_device* spi) {
+    struct ssd1306_graph* graph = get_graph(spi);
+    memset(&graph->graphics_buf, 0, SSD1306_GRAPHICS_BUF_SIZE);
+    return ssd1306_redraw_pages(spi, 0, SSD1306_DISPLAY_PAGES - 1);
+}

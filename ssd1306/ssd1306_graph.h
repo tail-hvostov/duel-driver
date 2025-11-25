@@ -23,5 +23,6 @@ extern u8* ssd1306_get_graphics_buf(struct spi_device* spi);
 //Возвращает ненулевое значение в случае неудачи.
 extern int ssd1306_redraw_pages(struct spi_device* spi, unsigned int first,
                                         unsigned int last);
+extern int ssd1306_reset_graphics_buf(struct spi_device* spi);
 
 #endif

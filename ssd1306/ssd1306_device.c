@@ -114,6 +114,8 @@ int ssd1306_device_startup(struct spi_device* spi) {
     ssd1306_order_delay(spi, 100);
     ssd1306_order_u8(spi, 0xAF);
     ssd1306_order_delay(spi, 100);
+
+    ssd1306_reset_graphics_buf(spi);
     return ssd1306_send_commands(spi);
 }
 
