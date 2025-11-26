@@ -53,8 +53,6 @@ const char* picture[PIC_HEIGHT] = {
     "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
 };
 
-char buf[BUF_LEN];
-
 void fill_buf(void) {
     int buf_i, col_i, line_i, bit_i;
     char buf_byte;
@@ -99,8 +97,10 @@ int main() {
     close(simple);
 
     puts("Success");
+    delete [] buf;
     return 0;
 fault:
     puts("Failure");
+    delete [] buf;
     return 1;
 }
