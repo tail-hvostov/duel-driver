@@ -59,6 +59,9 @@ inline int ssd1306_device_trylock(struct spi_device* spi) {
 }
 
 int ssd1306_device_startup(struct spi_device* spi) {
+    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+    struct ssd1306_config* config = &drvdata->config;
+
     ssd1306_hard_reset(spi);
     //Set Display ON/OFF (AEh/AFh)
     //AEh выключает дисплей.
@@ -67,11 +70,11 @@ int ssd1306_device_startup(struct spi_device* spi) {
     //дисплея по некоторому правилу. Младшие устанавливают "делитель"
     //частоты, изменяющийся от 1 до 16.
     //Set Display Clock Divide Ratio/Oscillator Frequency
-    ssd1306_order_u16(spi, 0xD5F0);
+    ssd1306_order_u16(spi, 0xD500 | (u16)config->clk_div_ratio_and_osc_freq);
     //Set Multiplex Ratio
     //Контроллер SSD1306 поддерживает различное число строк.
     //Эта команда это число ограничивает. В моём случае это 39+1.
-    ssd1306_order_u16(spi, 0xA827);
+    ssd1306_order_u16(spi, 0xA800 | (u16)config->height - 1);
     //Set Display Offset
     //Вертикально смещает изображение на некоторое количество строк.
     ssd1306_order_u16(spi, 0xD300);
@@ -102,13 +105,13 @@ int ssd1306_device_startup(struct spi_device* spi) {
     ssd1306_order_u16(spi, 0xAD30);
     //Set Contrast Control for BANK0 (81h)
     //Устанавливает контрастность дисплея от 00h до FFh.
-    ssd1306_order_u16(spi, 0x812F);
+    ssd1306_order_u16(spi, 0x8100 | (u16)config->contrast);
     //Set Pre-charge Period (D9h)
     //Устанавливает период заряда и разряда пикселей, кратный периоду CLK.
     ssd1306_order_u16(spi, 0xD922);
     //Set VCOMH Deselect Level (DBh)
     //Устанавливает напряжение VCOMH. Я даже не стал разбираться.
-    ssd1306_order_u16(spi, 0xDB20);
+    ssd1306_order_u16(spi, 0xDB00 | (u16)config->vcomh);
     //Entire Display ON (A4h/A5h)
     //A4h - нормальный режим отображения пикселей.
     //A5h - весь экран заливается белым.
@@ -121,7 +124,8 @@ int ssd1306_device_startup(struct spi_device* spi) {
     //Set Higher Column Start Address for Page Addressing Mode (10h~1Fh)
     //Младшие 4 бита каждой из команд задают какую-то из частей 8-битного
     //порядкового номера стартового столбца.
-    ssd1306_order_u16(spi, 0x0C11);
+    ssd1306_order_u16(spi, 0x0010 | (((u16)(config->col_start_addr & 0xF0)) << 8)
+        | (((u16)(config->col_start_addr & 0x0F)) >> 4));
     ssd1306_order_delay(spi, 100);
     ssd1306_order_u8(spi, 0xAF);
     ssd1306_order_delay(spi, 100);
