@@ -9,7 +9,7 @@
 unsigned int video_half;
 
 void fill_buf(void) {
-    int i;
+    unsigned int i;
     char val = 0;
     for (i = 0; i < video_size; i++) {
         buf[i] = val;
@@ -18,7 +18,7 @@ void fill_buf(void) {
 }
 
 int check_buf(void) {
-    int i;
+    unsigned int i;
     char val = 0;
     for (i = 0; i < video_size; i++) {
         if (val != buf[i]) {
@@ -30,7 +30,7 @@ int check_buf(void) {
 }
 
 int check_buf2(void) {
-    int i;
+    unsigned int i;
     char val = video_half;
     for (i = 0; i < (video_size - video_half); i++) {
         if (val != buf[i]) {

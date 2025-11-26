@@ -13,7 +13,7 @@ unsigned int page_size;
 
 void simple_pic(void) {
     char* pointer = buf;
-    int i;
+    unsigned int i;
     for (i = 0; i < page_size; i++) {
         *pointer = 0xFF;
         pointer += 1;
@@ -31,7 +31,7 @@ void simple_pic(void) {
 
 void fast_pic(void) {
     char* pointer = buf;
-    int i;
+    unsigned int i;
     for (i = 0; i < page_size; i++) {
         *pointer = 0xBD;
         pointer += 1;
@@ -47,7 +47,7 @@ void fast_pic(void) {
 }
 
 int check_buf1(void) {
-    int i = 0;
+    unsigned int i = 0;
     char* pointer = buf;
     for (i = 0; i < page_size; i++) {
         if (*pointer != 0xFF) {
@@ -78,7 +78,7 @@ int check_buf1(void) {
 } 
 
 int check_buf2(void) {
-    int i = 0;
+    unsigned int i = 0;
     char* pointer = buf;
     for (i = 0; i < sc_w / 8; i++) {
         if (*pointer != 0xFF) {
@@ -148,7 +148,7 @@ int check_buf2(void) {
 }
 
 void fill_buf(void) {
-    int i;
+    unsigned int i;
     char val = 0;
     for (i = 0; i < video_size; i++) {
         buf[i] = val;
@@ -157,7 +157,7 @@ void fill_buf(void) {
 }
 
 int check_buf3(void) {
-    int i;
+    unsigned int i;
     char val = video_half;
     for (i = 0; i < video_half; i++) {
         if (val != buf[i]) {
@@ -171,7 +171,7 @@ int check_buf3(void) {
 }
 
 int check_buf4(void) {
-    int i;
+    unsigned int i;
     char val = 0;
     for (i = 0; i < video_size; i++) {
         if (val != buf[i]) {
