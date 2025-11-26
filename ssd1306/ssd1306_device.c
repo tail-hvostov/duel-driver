@@ -74,7 +74,7 @@ int ssd1306_device_startup(struct spi_device* spi) {
     //Set Multiplex Ratio
     //Контроллер SSD1306 поддерживает различное число строк.
     //Эта команда это число ограничивает. В моём случае это 39+1.
-    ssd1306_order_u16(spi, 0xA800 | (u16)config->height - 1);
+    ssd1306_order_u16(spi, 0xA800 | (u16)(config->height - 1));
     //Set Display Offset
     //Вертикально смещает изображение на некоторое количество строк.
     ssd1306_order_u16(spi, 0xD300);
