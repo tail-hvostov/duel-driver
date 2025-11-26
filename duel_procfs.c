@@ -15,13 +15,14 @@ static ssize_t proc_read(struct file *filp, char __user *buf, size_t count, loff
         return -ENODEV;
     }
     int result = 0;
-    if (ssd1306_device_lock_interruptible(spi)) {
-        return -ERESTARTSYS;
-    }
     if (-1 == text_buf_len) {
+        if (ssd1306_device_lock_interruptible(spi)) {
+            return -ERESTARTSYS;
+        }
         sprintf(text_buf, "width: %u\nheight: %u\nmemory_mode: page\n",
                 SSD1306_DISPLAY_WIDTH, SSD1306_DISPLAY_PAGES * 8);
         text_buf_len = strlen(text_buf);
+        ssd1306_device_unlock(spi);
     }
     size_t remaining_bytes = text_buf_len - *f_pos;
     count = (count > remaining_bytes) ? remaining_bytes : count;
@@ -32,7 +33,6 @@ static ssize_t proc_read(struct file *filp, char __user *buf, size_t count, loff
     *f_pos += count;
     result = count;
 ending:
-    ssd1306_device_unlock(spi);
     return result;
 }
 
