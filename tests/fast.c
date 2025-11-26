@@ -42,7 +42,7 @@ int check_buf2(void) {
     return 1;
 }
 
-int main(int argc, const char* argv[]) {
+int main() {
     if (init_video_params(40)) {
         puts("Couldn't extract display parameters.");
         goto fault;

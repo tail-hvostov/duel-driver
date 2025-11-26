@@ -4,16 +4,16 @@
 #include <cstdlib>
 #include <cctype>
 
-bool parseAndValidateParams() {
+bool parse_and_validate_params() {
     std::ifstream file("/proc/duel-params");
     if (!file.is_open()) {
         puts("Couldn't open /proc/duel-params.");
         return false;
     }
 
-    bool hasWidth = false;
-    bool hasHeight = false;
-    bool hasMemoryMode = false;
+    bool has_width = false;
+    bool has_height = false;
+    bool has_memory_mode = false;
     
     std::string line;
     while (std::getline(file, line)) {
@@ -21,16 +21,16 @@ bool parseAndValidateParams() {
         if (line.empty()) continue;
         
         // Ищем разделитель ':'
-        size_t colonPos = line.find(':');
-        if (colonPos == std::string::npos) {
+        size_t colon_pos = line.find(':');
+        if (colon_pos == std::string::npos) {
             printf("Invalid format in line: %s.\n", line.c_str());
             file.close();
             return false;
         }
         
         // Извлекаем ключ и значение
-        std::string key = line.substr(0, colonPos);
-        std::string value = line.substr(colonPos + 1);
+        std::string key = line.substr(0, colon_pos);
+        std::string value = line.substr(colon_pos + 1);
         
         // Убираем пробелы вокруг ключа и значения
         key.erase(0, key.find_first_not_of(" \t"));
@@ -40,7 +40,7 @@ bool parseAndValidateParams() {
         
         // Обрабатываем параметры
         if (key == "width") {
-            hasWidth = true;
+            has_width = true;
             
             // Проверяем, что значение - целое неотрицательное число > 0
             for (char c : value) {
@@ -59,7 +59,7 @@ bool parseAndValidateParams() {
             }
             
         } else if (key == "height") {
-            hasHeight = true;
+            has_height = true;
             
             // Проверяем, что значение - целое неотрицательное число > 0
             for (char c : value) {
@@ -78,7 +78,7 @@ bool parseAndValidateParams() {
             }
             
         } else if (key == "memory_mode") {
-            hasMemoryMode = true;
+            has_memory_mode = true;
             
             // Проверяем, что значение равно "page"
             if (value != "page") {
@@ -92,15 +92,15 @@ bool parseAndValidateParams() {
     file.close();
     
     // Проверяем, что все обязательные параметры присутствуют
-    if (!hasWidth) {
+    if (!has_width) {
         puts("Missing parameter: \"width\".");
         return false;
     }
-    if (!hasHeight) {
+    if (!has_height) {
         puts("Missing parameter: \"height\".");
         return false;
     }
-    if (!hasMemoryMode) {
+    if (!has_memory_mode) {
         puts("Missing parameter: \"memory_mode\".");
         return false;
     }
@@ -111,7 +111,7 @@ bool parseAndValidateParams() {
 int main() {
     puts("1. Procfs test.");
     
-    if (parseAndValidateParams()) {
+    if (parse_and_validate_params()) {
         puts("Success!");
         return 0;
     } else {

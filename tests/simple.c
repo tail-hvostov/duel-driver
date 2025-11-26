@@ -6,6 +6,8 @@
 
 #include "common/common_ops.h"
 
+#define SIMPLE_FILE "/dev/duel2"
+
 unsigned int video_half;
 unsigned int page_size;
 
@@ -353,7 +355,7 @@ int test6() {
     return 1;
 }
 
-int main(int argc, const char* argv[]) {
+int main() {
     if (init_video_params(40)) {
         puts("Couldn't extract display parameters.");
         goto fault;

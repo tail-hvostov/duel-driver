@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-int main(int argc, const char* argv[]) {
+int main() {
     int str_file, simple_file, fast_file;
 
     puts("1. Str device opening.");
