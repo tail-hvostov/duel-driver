@@ -64,7 +64,8 @@ bool extract_width_height(unsigned int* width, unsigned int* height) {
             
             *width = w;
             
-        } else if (key == "height") {
+        }
+        else if (key == "height") {
             has_height = true;
             
             // Проверяем, что значение - целое неотрицательное число > 0

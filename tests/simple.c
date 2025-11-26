@@ -356,21 +356,24 @@ int test6() {
 }
 
 int main() {
+    int result = 1;
     if (init_video_params(40)) {
         puts("Couldn't extract display parameters.");
-        goto fault;
+        result = 0;
     }
-    video_half = video_size / 2;
-    page_size = sc_w * 8;
+    if (result) {
+        video_half = video_size / 2;
+        page_size = sc_w * 8;
+        result = test1() && test2() && test3() && test4() && test5() && test6();
+    }
 
-    int result = test1() && test2() && test3() && test4() && test5() && test6();
+    delete [] buf;
     if (result) {
         puts("Success!");
-        delete [] buf;
         return 0;
     }
-fault:
-    puts("Failure!");
-    delete [] buf;
-    return 1;
+    else {
+        puts("Failure!");
+        return 1;
+    }
 }
