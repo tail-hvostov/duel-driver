@@ -363,7 +363,7 @@ int main() {
     }
     if (result) {
         video_half = video_size / 2;
-        page_size = sc_w * 8;
+        page_size = sc_w;
         result = test1() && test2() && test3() && test4() && test5() && test6();
     }
 
