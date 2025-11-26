@@ -5,7 +5,20 @@ static struct spi_device* device_instance = NULL;
 
 static const struct ssd1306_config ssd1306_72x40_config = {
     .width = 72,
-    .height = 40
+    .height = 40,
+    .clk_div_ratio_and_osc_freq = 0xF0,
+    .contrast = 0x2F,
+    .vcomh = 0x20,
+    .col_start_addr = 0x1C
+};
+
+static const struct ssd1306_config ssd1306_128x64_config = {
+    .width = 128,
+    .height = 64,
+    .clk_div_ratio_and_osc_freq = 0x80,
+    .contrast = 0xCF,
+    .vcomh = 0x40,
+    .col_start_addr = 0
 };
 
 static const struct of_device_id ssd1306_dt_ids[] = {
