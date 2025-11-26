@@ -52,6 +52,7 @@ const char* picture[PIC_HEIGHT] = {
     "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
 };
 
+//Для простоты этот алгоритм предполагает, что ширина делится на 8.
 void fill_buf(void) {
     memset(buf, 0, video_size);
     unsigned int lm, tm, buf_i, cur_bit, pic_i;
@@ -60,13 +61,13 @@ void fill_buf(void) {
 
     tm = (sc_h - PIC_HEIGHT) / 2;
     lm = (sc_w - PIC_WIDTH) / 2;
-    buf_i = (tm * sc_w) + (lm / 8);
+    buf_i = (tm * sc_w / 8) + (lm / 8);
     cur_bit = 7 - lm % 8;
     line_i = 0;
     col_i = 0;
     buf_byte = 0;
 
-    for (pic_i = 0; pic_i < (PIC_HEIGHT * PIC_WIDTH / 8); pic_i++) {
+    for (pic_i = 0; pic_i < PIC_HEIGHT * PIC_WIDTH; pic_i++) {
         buf_byte |= (picture[line_i][col_i] == 'I') << cur_bit;
         if (cur_bit) {
             cur_bit -= 1;
@@ -80,42 +81,16 @@ void fill_buf(void) {
         col_i += 1;
         if (PIC_WIDTH == col_i) {
             line_i += 1;
-            col_i += 1;
+            col_i = 0;
             tm += 1;
             if (buf_byte) {
                 buf[buf_i] = buf_byte;
             }
-            buf_i = (tm * sc_w) + (lm / 8);
+            buf_i = (tm * sc_w / 8) + (lm / 8);
             cur_bit = 7 - lm % 8;
             buf_byte = 0;
         }
     }
-
-    /*unsigned int pic_i, buf_i, col_i, line_i, bit_i;
-    char buf_byte;
-    memset(buf, 0, video_size);
-    unsigned int top_margin, left_margin;
-    top_margin = (sc_h - PIC_HEIGHT) / 2;
-    left_margin = (sc_w - PIC_WIDTH) / 2;
-
-    col_i = 0;
-    line_i = 0;
-    buf_i = top_margin * sc_w + le
-    for (buf_i = 0; buf_i < (PIC_HEIGHT * PIC_WIDTH / 8); buf_i++) {
-        buf_byte = 0;
-        for (bit_i = 0; bit_i < 8; bit_i++) {
-            buf_byte = buf_byte << 1;
-            if (picture[line_i][col_i] == 'I') {
-                buf_byte |= 1;
-            }
-            col_i++;
-            if (col_i == PIC_WIDTH) {
-                col_i = 0;
-                line_i += 1;
-            }
-        }
-        buf[buf_i] = buf_byte;
-    }*/
 }
 
 int main() {
