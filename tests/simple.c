@@ -3,25 +3,29 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <cctype>
 
-#define BUF_SIZE 400
-#define SIMPLE_FILE "/dev/duel2"
+#include "common/common_ops.h"
 
-char buf[BUF_SIZE];
+unsigned int video_half;
+unsigned int page_size;
 
 void simple_pic(void) {
     char* pointer = buf;
     int i;
-    for (i = 0; i < 72; i++) {
+    for (i = 0; i < page_size; i++) {
         *pointer = 0xFF;
         pointer += 1;
     }
     //9
-    for (i = 0; i < 9; i++) {
+    for (i = 0; i < sc_w / 8; i++) {
         *pointer = 0xAA;
         pointer += 1;
     }
-    for (i = 0; i < 9 * 31; i++) {
+    for (i = 0; i < video_size - sc_w / 8 - page_size; i++) {
         *pointer = 0xFF;
         pointer += 1;
     }
@@ -30,15 +34,15 @@ void simple_pic(void) {
 void fast_pic(void) {
     char* pointer = buf;
     int i;
-    for (i = 0; i < 72; i++) {
+    for (i = 0; i < page_size; i++) {
         *pointer = 0xBD;
         pointer += 1;
     }
-    for (i = 0; i < 72; i++) {
+    for (i = 0; i < page_size; i++) {
         *pointer = 0xDB;
         pointer += 1;
     }
-    for (i = 0; i < 72 * 3; i++) {
+    for (i = 0; i < video_size - 2 * page_size; i++) {
         *pointer = 0xFF;
         pointer += 1;
     }
@@ -47,13 +51,13 @@ void fast_pic(void) {
 int check_buf1(void) {
     int i = 0;
     char* pointer = buf;
-    for (i = 0; i < 72; i++) {
+    for (i = 0; i < page_size; i++) {
         if (*pointer != 0xFF) {
             return 0;
         }
         pointer += 1;
     }
-    for (i = 0; i < 72; i++) {
+    for (i = 0; i < page_size; i++) {
         if (i % 2 == 0) {
             if (*pointer != 0xFF) {
                 return 0;
@@ -66,7 +70,7 @@ int check_buf1(void) {
         }
         pointer += 1;
     }
-    for (i = 0; i < 72 * 3; i++) {
+    for (i = 0; i < video_size - page_size * 2; i++) {
         if (*pointer != 0xFF) {
             return 0;
         }
@@ -78,65 +82,65 @@ int check_buf1(void) {
 int check_buf2(void) {
     int i = 0;
     char* pointer = buf;
-    for (i = 0; i < 9; i++) {
+    for (i = 0; i < sc_w / 8; i++) {
         if (*pointer != 0xFF) {
             return 0;
         }
         pointer += 1;
     }
-    for (i = 0; i < 9; i++) {
+    for (i = 0; i < sc_w / 8; i++) {
         if (*pointer != 0) {
             return 0;
         }
         pointer += 1;
     }
-    for (i = 0; i < 9 * 4; i++) {
+    for (i = 0; i < sc_w / 8 * 4; i++) {
         if (*pointer != 0xFF) {
             return 0;
         }
         pointer += 1;
     }
     //Здесь закончилось D и началось B
-    for (i = 0; i < 9; i++) {
+    for (i = 0; i < sc_w / 8; i++) {
         if (*pointer != 0) {
             return 0;
         }
         pointer += 1;
     }
-    for (i = 0; i < 9 * 3; i++) {
+    for (i = 0; i < sc_w / 8 * 3; i++) {
         if (*pointer != 0xFF) {
             return 0;
         }
         pointer += 1;
     }
     //Здесь закончилось B и началось другое B.
-    for (i = 0; i < 9; i++) {
+    for (i = 0; i < sc_w / 8; i++) {
         if (*pointer != 0) {
             return 0;
         }
         pointer += 1;
     }
-    for (i = 0; i < 9 * 2; i++) {
+    for (i = 0; i < sc_w / 8 * 2; i++) {
         if (*pointer != 0xFF) {
             return 0;
         }
         pointer += 1;
     }
     //Здесь закончилось B и началось D.
-    for (i = 0; i < 9; i++) {
+    for (i = 0; i < sc_w / 8; i++) {
         if (*pointer != 0) {
             return 0;
         }
         pointer += 1;
     }
-    for (i = 0; i < 9 * 2; i++) {
+    for (i = 0; i < sc_w / 8 * 2; i++) {
         if (*pointer != 0xFF) {
             return 0;
         }
         pointer += 1;
     }
     //Здесь закончилось D.
-    for (i = 0; i < 72 * 3; i++) {
+    while (pointer != (buf + video_size)) {
         if (*pointer != 0xFF) {
             return 0;
         }
@@ -148,7 +152,7 @@ int check_buf2(void) {
 void fill_buf(void) {
     int i;
     char val = 0;
-    for (i = 0; i < 360; i++) {
+    for (i = 0; i < video_size; i++) {
         buf[i] = val;
         val++;
     }
@@ -156,11 +160,11 @@ void fill_buf(void) {
 
 int check_buf3(void) {
     int i;
-    char val = 180;
-    for (i = 0; i < 180; i++) {
+    char val = video_half;
+    for (i = 0; i < video_half; i++) {
         if (val != buf[i]) {
             printf("i=%d   val=%d   buf[i]=%d\n", i, val, buf[i]);
-            printf("buf[1]=%d   buf[179]=%d\n", buf[1], buf[179]);
+            printf("buf[1]=%d   buf[%d]=%d\n", buf[1], video_half - 1, buf[video_half - 1]);
             return 0;
         }
         val++;
@@ -171,7 +175,7 @@ int check_buf3(void) {
 int check_buf4(void) {
     int i;
     char val = 0;
-    for (i = 0; i < 360; i++) {
+    for (i = 0; i < video_size; i++) {
         if (val != buf[i]) {
             return 0;
         }
@@ -182,14 +186,14 @@ int check_buf4(void) {
 
 int test1() {
     int simple;
-    puts("1. Writing 360 bytes.");
+    printf("1. Writing %u bytes.\n", video_size);
     simple = open(SIMPLE_FILE, O_WRONLY);
     if (simple < 0) {
         puts("The file did not open.");
         return 0;
     }
-    if (360 != write(simple, buf, 360)) {
-        puts("Couldn't write 360 bytes.");
+    if (video_size != write(simple, buf, video_size)) {
+        printf("Couldn't write %u bytes.\n", video_size);
         close(simple);
         return 0;
     }
@@ -199,14 +203,14 @@ int test1() {
 
 int test2() {
     int simple;
-    puts("2. Attempting to write 400 bytes.");
+    printf("2. Attempting to write %u bytes.\n", buf_size);
     simple = open(SIMPLE_FILE, O_WRONLY);
     if (simple < 0) {
         puts("The file did not open.");
         return 0;
     }
-    if (BUF_SIZE == write(simple, buf, BUF_SIZE)) {
-        puts("400 bytes were written.");
+    if (buf_size == write(simple, buf, buf_size)) {
+        printf("%u bytes were written.\n", buf_size);
         close(simple);
         return 0;
     }
@@ -229,15 +233,16 @@ int test3() {
         close(simple);
         return 0;
     }
-    if ((72 != write(simple, buf, 72)) || (288 != write(simple, buf +  72, 288))) {
-        puts("Couldn't write 360 bytes.");
+    if ((page_size != write(simple, buf, page_size)) ||
+        (video_size - page_size != write(simple, buf +  page_size, video_size - page_size))) {
+        printf("Couldn't write %u bytes.\n", video_size);
         close(simple);
         close(fast);
         return 0;
     }
     close(simple);
-    if (360 != read(fast, buf, 360)) {
-        puts("Couldn't read 360 bytes.");
+    if (video_size != read(fast, buf, video_size)) {
+        printf("Couldn't read %u bytes.\n", video_size);
         close(fast);
         return 0;
     }
@@ -264,15 +269,16 @@ int test4() {
         close(simple);
         return 0;
     }
-    if (360 != write(fast, buf, 360)) {
-        puts("Couldn't write 360 bytes.");
+    if (video_size != write(fast, buf, video_size)) {
+        printf("Couldn't write %u bytes.\n", video_size);
         close(simple);
         close(fast);
         return 0;
     }
     close(fast);
-    if ((289 != read(simple, buf, 289)) || (71 != read(simple, buf + 289, 71))) {
-        puts("Couldn't read 360 bytes.");
+    if ((page_size + 1 != read(simple, buf, page_size + 1)) ||
+        ((video_size - page_size - 1) != read(simple, buf + page_size + 1, video_size - page_size - 1))) {
+        printf("Couldn't read %u bytes.\n", video_size);
         close(simple);
         return 0;
     }
@@ -293,16 +299,16 @@ int test5() {
         return 0;
     }
     fill_buf();
-    if (360 != write(simple, buf, 360)) {
-        puts("Couldn't write 360 bytes.");
+    if (video_size != write(simple, buf, video_size)) {
+        printf("Couldn't write %u bytes.\n", video_size);
         close(simple);
         return 0;
     }
     close(simple);
     simple = open(SIMPLE_FILE, O_RDONLY);
-    memset(buf, 0, 360);
-    if (360 != read(simple, buf, 360)) {
-        puts("Couldn't read 360 bytes.");
+    memset(buf, 0, video_size);
+    if (video_size != read(simple, buf, video_size)) {
+        printf("Couldn't read %u bytes.\n", video_size);
         close(simple);
         return 0;
     }
@@ -323,22 +329,22 @@ int test6() {
         return 0;
     }
     fill_buf();
-    if (360 != write(simple, buf, 360)) {
-        puts("Couldn't write 360 bytes.");
+    if (video_size != write(simple, buf, video_size)) {
+        printf("Couldn't write %u bytes.\n", video_size);
         close(simple);
         return 0;
     }
     close(simple);
     simple = open(SIMPLE_FILE, O_RDONLY);
-    memset(buf, 0, 360);
-    if ((off_t)-1 == lseek(simple, 180, SEEK_SET)) {
+    memset(buf, 0, video_size);
+    if ((off_t)-1 == lseek(simple, video_half, SEEK_SET)) {
         puts("Unsuccessful lseek call.");
         printf("Errno=%d.\n", errno);
         close(simple);
         return 0;
     }
-    if (180 != read(simple, buf, 180)) {
-        puts("Couldn't read 180 bytes.");
+    if (video_size - video_half != read(simple, buf, video_size - video_half)) {
+        printf("Couldn't read %u bytes.\n", video_size - video_half);
         close(simple);
         return 0;
     }
@@ -352,13 +358,21 @@ int test6() {
 }
 
 int main(int argc, const char* argv[]) {
+    if (init_video_params(40)) {
+        puts("Couldn't extract display parameters.");
+        goto fault;
+    }
+    video_half = video_size / 2;
+    page_size = sc_w * 8;
+
     int result = test1() && test2() && test3() && test4() && test5() && test6();
     if (result) {
         puts("Success!");
+        delete [] buf;
         return 0;
     }
-    else {
-        puts("Failure!");
-        return 1;
-    }
+fault:
+    puts("Failure!");
+    delete [] buf;
+    return 1;
 }

@@ -31,12 +31,19 @@ clean:
 TESTS_DIR = tests
 TESTS_SRC = $(wildcard $(TESTS_DIR)/*.c)
 TESTS_OUT = $(patsubst $(TESTS_DIR)/%.c,$(TESTS_DIR)/compiled/%.out,$(TESTS_SRC))
+TESTS_COMMON_SRC = $(wildcard $(TESTS_COMMON_DIR)/*.c)
+TESTS_COMMON_OBJ = $(patsubst $(TESTS_COMMON_DIR)/%.c,$(TESTS_DIR)/compiled/common/%.o,$(TESTS_COMMON_SRC))
+TESTS_CFLAGS = -I$(TESTS_COMMON_DIR) -Wall -Wextra
 
 tests: $(TESTS_OUT)
 
-$(TESTS_DIR)/compiled/%.out: $(TESTS_DIR)/%.c
+$(TESTS_DIR)/compiled/%.out: $(TESTS_DIR)/%.c $(TESTS_COMMON_OBJ)
 	@mkdir -p $(TESTS_DIR)/compiled
-	$(CXX) $< -o $@
+	$(CXX) $(TESTS_CFLAGS) $< $(TESTS_COMMON_OBJ) -o $@
+
+$(TESTS_DIR)/compiled/common/%.o: $(TESTS_COMMON_DIR)/%.c
+	@mkdir -p $(TESTS_DIR)/compiled/common
+	$(CXX) $(TESTS_CFLAGS) -c $< -o $@
 
 clean-tests:
 	rm -rf $(TESTS_DIR)/compiled
