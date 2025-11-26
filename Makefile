@@ -30,6 +30,7 @@ clean:
 
 TESTS_DIR = tests
 TESTS_SRC = $(wildcard $(TESTS_DIR)/*.c)
+TESTS_COMMON_DIR = $(TESTS_DIR)/common
 TESTS_OUT = $(patsubst $(TESTS_DIR)/%.c,$(TESTS_DIR)/compiled/%.out,$(TESTS_SRC))
 TESTS_COMMON_SRC = $(wildcard $(TESTS_COMMON_DIR)/*.c)
 TESTS_COMMON_OBJ = $(patsubst $(TESTS_COMMON_DIR)/%.c,$(TESTS_DIR)/compiled/common/%.o,$(TESTS_COMMON_SRC))
