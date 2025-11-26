@@ -36,7 +36,7 @@ tests: $(TESTS_OUT)
 
 $(TESTS_DIR)/compiled/%.out: $(TESTS_DIR)/%.c
 	@mkdir -p $(TESTS_DIR)/compiled
-	$(CC) $< -o $@
+	$(CXX) $< -o $@
 
 clean-tests:
 	rm -rf $(TESTS_DIR)/compiled
