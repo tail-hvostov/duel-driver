@@ -1,6 +1,7 @@
 #include "duel_procfs.h"
 #include "ssd1306/ssd1306_driver.h"
 #include "ssd1306/ssd1306_device.h"
+#include "ssd1306/ssd1306_graph.h"
 
 #include <linux/proc_fs.h>
 
@@ -18,7 +19,8 @@ static ssize_t proc_read(struct file *filp, char __user *buf, size_t count, loff
         return -ERESTARTSYS;
     }
     if (-1 == text_buf_len) {
-        sprintf(text_buf, "width:\nheight:\nmemory_mode: page\n");
+        sprintf(text_buf, "width: %u\nheight: %u\nmemory_mode: page\n",
+                SSD1306_DISPLAY_WIDTH, SSD1306_DISPLAY_PAGES * 8);
         text_buf_len = strlen(text_buf);
     }
     size_t remaining_bytes = text_buf_len - *f_pos;
