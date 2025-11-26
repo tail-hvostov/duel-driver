@@ -22,7 +22,7 @@ int ssd1306_init_device(struct spi_device* spi) {
         kfree(drvdata);
         return result;
     }
-    default_config = of_device_get_match_data(&spi->dev);
+    default_config = device_get_match_data(&spi->dev);
     if (!default_config) {
         ssd1306_exit_graph(spi);
         ssd1306_exit_cmd(spi);
@@ -30,7 +30,6 @@ int ssd1306_init_device(struct spi_device* spi) {
         return -ENODEV;
     }
     drvdata->config = *default_config;
-    printk(KERN_WARNING "width=%u\n", default_config->width);
 
     mutex_init(&drvdata->mutex);
     return 0;
