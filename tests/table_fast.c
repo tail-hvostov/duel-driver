@@ -80,7 +80,7 @@ void fill_buf(void) {
 }
 
 int main() {
-    if (init_video_params(40)) {
+    if (init_video_params(0)) {
         puts("Couldn't extract display parameters.");
         goto fault;
     }
