@@ -3,10 +3,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include <cctype>
 
 #include "common/common_ops.h"
 

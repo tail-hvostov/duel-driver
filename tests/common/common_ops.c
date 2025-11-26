@@ -1,5 +1,10 @@
 #include "common_ops.h"
 
+#include <string.h>
+#include <fstream>
+#include <cstdlib>
+#include <cctype>
+
 char* buf = nullptr;
 unsigned int sc_w;
 unsigned int sc_h;
@@ -102,7 +107,7 @@ bool init_video_params(unsigned int extra_buf) {
         return false;
     }
     video_size = sc_w * sc_h / 8;
-    buf_size = video_size + 40;
+    buf_size = video_size + extra_buf;
     buf = new char[buf_size];
     return true;
 }
