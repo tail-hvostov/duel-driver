@@ -4,6 +4,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include "common/common_ops.h"
+
 #define PIC_HEIGHT 40
 #define PIC_WIDTH 72
 #define BUF_LEN 360
@@ -78,6 +80,11 @@ void fill_buf(void) {
 }
 
 int main() {
+    if (init_video_params(40)) {
+        puts("Couldn't extract display parameters.");
+        goto fault;
+    }
+
     int fast;
 
     fill_buf();
