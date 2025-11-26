@@ -8,7 +8,6 @@
 
 #define PIC_HEIGHT 40
 #define PIC_WIDTH 72
-#define BUF_LEN 360
 
 const char* picture[PIC_HEIGHT] = {
     "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
@@ -54,11 +53,55 @@ const char* picture[PIC_HEIGHT] = {
 };
 
 void fill_buf(void) {
-    int buf_i, col_i, line_i, bit_i;
+    memset(buf, 0, video_size);
+    unsigned int lm, tm, buf_i, cur_bit, pic_i;
+    int line_i, col_i;
     char buf_byte;
+
+    tm = (sc_h - PIC_HEIGHT) / 2;
+    lm = (sc_w - PIC_WIDTH) / 2;
+    buf_i = (tm * sc_w) + (lm / 8);
+    cur_bit = 7 - lm % 8;
+    line_i = 0;
+    col_i = 0;
+    buf_byte = 0;
+
+    for (pic_i = 0; pic_i < (PIC_HEIGHT * PIC_WIDTH / 8); pic_i++) {
+        buf_byte |= (picture[line_i][col_i] == 'I') << cur_bit;
+        if (cur_bit) {
+            cur_bit -= 1;
+        }
+        else {
+            buf[buf_i] = buf_byte;
+            buf_byte = 0;
+            buf_i += 1;
+            cur_bit = 7;
+        }
+        col_i += 1;
+        if (PIC_WIDTH == col_i) {
+            line_i += 1;
+            col_i += 1;
+            tm += 1;
+            if (buf_byte) {
+                buf[buf_i] = buf_byte;
+            }
+            buf_i = (tm * sc_w) + (lm / 8);
+            cur_bit = 7 - lm % 8;
+            buf_byte = 0;
+        }
+    }
+
+    /*unsigned int pic_i, buf_i, col_i, line_i, bit_i;
+    char buf_byte;
+    memset(buf, 0, video_size);
+    unsigned int top_margin, left_margin;
+    top_margin = (sc_h - PIC_HEIGHT) / 2;
+    left_margin = (sc_w - PIC_WIDTH) / 2;
+
     col_i = 0;
     line_i = 0;
-    for (buf_i = 0; buf_i < BUF_LEN; buf_i++) {
+    buf_i = top_margin * sc_w + le
+    for (buf_i = 0; buf_i < (PIC_HEIGHT * PIC_WIDTH / 8); buf_i++) {
         buf_byte = 0;
         for (bit_i = 0; bit_i < 8; bit_i++) {
             buf_byte = buf_byte << 1;
@@ -72,7 +115,7 @@ void fill_buf(void) {
             }
         }
         buf[buf_i] = buf_byte;
-    }
+    }*/
 }
 
 int main() {
@@ -89,8 +132,8 @@ int main() {
         puts("The file did not open.");
         goto fault;
     }
-    if (360 != write(simple, buf, 360)) {
-        puts("Couldn't write 360 bytes.");
+    if (video_size != write(simple, buf, video_size)) {
+        printf("Couldn't write %u bytes.\n", video_size);
         close(simple);
         goto fault;
     }
