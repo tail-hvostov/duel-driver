@@ -152,27 +152,27 @@ int main(int argc, const char* argv[]) {
 
     int fast;
 
-    printf("1. Writing %lu bytes.\n", video_size);
+    printf("1. Writing %u bytes.\n", video_size);
     fast = open("/dev/duel1", O_WRONLY);
     if (fast < 0) {
         puts("The file did not open.");
         goto fault;
     }
     if (video_size != write(fast, buf, video_size)) {
-        printf("Couldn't write %lu bytes.\n", video_size);
+        printf("Couldn't write %u bytes.\n", video_size);
         close(fast);
         goto fault;
     }
     close(fast);
 
-    printf("2. Attempting to write %lu bytes.\n", buf_size);
+    printf("2. Attempting to write %u bytes.\n", buf_size);
     fast = open("/dev/duel1", O_WRONLY);
     if (fast < 0) {
         puts("The file did not open.");
         goto fault;
     }
     if (buf_size == write(fast, buf, buf_size)) {
-        printf("%lu bytes were written.\n", buf_size);
+        printf("%u bytes were written.\n", buf_size);
         close(fast);
         goto fault;
     }
@@ -186,7 +186,7 @@ int main(int argc, const char* argv[]) {
     }
     fill_buf();
     if (video_size != write(fast, buf, video_size)) {
-        printf("Couldn't write %lu bytes.\n", video_size);
+        printf("Couldn't write %u bytes.\n", video_size);
         close(fast);
         goto fault;
     }
@@ -194,7 +194,7 @@ int main(int argc, const char* argv[]) {
     fast = open("/dev/duel1", O_RDONLY);
     memset(buf, 0, video_size);
     if (video_size != read(fast, buf, video_size)) {
-        printf("Couldn't read %lu bytes.\n", video_size);
+        printf("Couldn't read %u bytes.\n", video_size);
         close(fast);
         goto fault;
     }
@@ -212,7 +212,7 @@ int main(int argc, const char* argv[]) {
     }
     fill_buf();
     if (video_size != write(fast, buf, video_size)) {
-        printf("Couldn't write %lu bytes.\n", video_size);
+        printf("Couldn't write %u bytes.\n", video_size);
         close(fast);
         goto fault;
     }
@@ -221,7 +221,7 @@ int main(int argc, const char* argv[]) {
     memset(buf, 0, video_size);
     if ((video_half != read(fast, buf, video_half)) ||
         ((video_size - video_half) != read(fast, buf + video_half, video_size - video_half))) {
-        printf("Couldn't read %lu bytes.\n", video_size);
+        printf("Couldn't read %u bytes.\n", video_size);
         close(fast);
         goto fault;
     }
@@ -239,7 +239,7 @@ int main(int argc, const char* argv[]) {
     }
     fill_buf();
     if (video_size != write(fast, buf, video_size)) {
-        printf("Couldn't write %lu bytes.\n", video_size);
+        printf("Couldn't write %u bytes.\n", video_size);
         close(fast);
         goto fault;
     }
@@ -253,7 +253,7 @@ int main(int argc, const char* argv[]) {
         goto fault;
     }
     if (video_size - video_half != read(fast, buf, video_size - video_half)) {
-        printf("Couldn't read %lu bytes.\n", video_size - video_half);
+        printf("Couldn't read %u bytes.\n", video_size - video_half);
         close(fast);
         goto fault;
     }
