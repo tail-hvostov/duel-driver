@@ -69,7 +69,7 @@ void fill_buf(void) {
 
     for (pic_i = 0; pic_i < PIC_HEIGHT * PIC_WIDTH; pic_i++) {
         buf_byte |= (picture[line_i][col_i] == 'I') << cur_bit;
-        if (cur_bit < 8) {
+        if (cur_bit < 7) {
             cur_bit += 1;
         }
         else {
@@ -91,28 +91,6 @@ void fill_buf(void) {
             buf_byte = 0;
         }
     }
-
-    /*int buf_i, col_i, line_i, bit_i;
-    char buf_byte;
-    col_i = 0;
-    line_i = 0;
-    for (buf_i = 0; buf_i < BUF_LEN; buf_i++) {
-        buf_byte = 0;
-        for (bit_i = 0; bit_i < 8; bit_i++) {
-            buf_byte = buf_byte >> 1;
-            if (picture[line_i][col_i] == 'I') {
-                buf_byte |= 0x80;
-            }
-            line_i++;
-        }
-        buf[buf_i] = buf_byte;
-        line_i -= 8;
-        col_i += 1;
-        if (col_i == PIC_WIDTH) {
-            col_i = 0;
-            line_i += 8;
-        }
-    }*/
 }
 
 int main() {
