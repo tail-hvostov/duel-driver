@@ -6,11 +6,17 @@
 #include "ssd1306_cmd.h"
 #include "ssd1306_graph.h"
 
+struct ssd1306_config {
+    u8 width;
+    u8 height;
+};
+
 struct ssd1306_drvdata {
     //Мьютекс должен всегда использоваться внешними модулями.
     struct mutex mutex;
     struct ssd1306_cmd cmd;
     struct ssd1306_graph graph;
+    struct ssd1306_config config;
 };
 
 extern int ssd1306_init_device(struct spi_device* spi);

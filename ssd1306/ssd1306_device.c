@@ -3,6 +3,8 @@
 int ssd1306_init_device(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata;
     int result;
+    const struct ssd1306_config* default_config;
+
     drvdata = kmalloc(sizeof(struct ssd1306_drvdata), GFP_KERNEL);
     if (!drvdata) {
         printk(KERN_WARNING "Duel: out of memory.\n");
@@ -20,6 +22,16 @@ int ssd1306_init_device(struct spi_device* spi) {
         kfree(drvdata);
         return result;
     }
+    default_config = of_device_get_match_data(&spi->dev);
+    if (!default_config) {
+        ssd1306_exit_graph(spi);
+        ssd1306_exit_cmd(spi);
+        kfree(drvdata);
+        return -ENODEV;
+    }
+    drvdata->config = *default_config;
+    printk(KERN_WARNING "width=%u\n", default_config->width);
+
     mutex_init(&drvdata->mutex);
     return 0;
 }

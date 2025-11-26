@@ -3,8 +3,13 @@
 
 static struct spi_device* device_instance = NULL;
 
+static const struct ssd1306_72x40_config = {
+    .width = 72;
+    .height = 40;
+};
+
 static const struct of_device_id ssd1306_dt_ids[] = {
-    { .compatible = "duel,ssd1306" }, // Совпадение с Device Tree
+    {.compatible = "duel,ssd1306", .data = &ssd1306_72x40_config},
     { }
 };
 
