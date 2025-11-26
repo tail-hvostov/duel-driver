@@ -357,7 +357,7 @@ int test6() {
 
 int main() {
     int result = 1;
-    if (init_video_params(40)) {
+    if (!init_video_params(40)) {
         puts("Couldn't extract display parameters.");
         result = 0;
     }

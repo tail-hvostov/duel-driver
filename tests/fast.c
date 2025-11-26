@@ -43,7 +43,7 @@ int check_buf2(void) {
 }
 
 int main() {
-    if (init_video_params(40)) {
+    if (!init_video_params(40)) {
         puts("Couldn't extract display parameters.");
         goto fault;
     }
