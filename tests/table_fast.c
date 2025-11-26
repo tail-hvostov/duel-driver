@@ -54,7 +54,45 @@ const char* picture[PIC_HEIGHT] = {
 };
 
 void fill_buf(void) {
-    int buf_i, col_i, line_i, bit_i;
+    memset(buf, 0, video_size);
+    unsigned int lm, tm, buf_i, cur_bit, pic_i;
+    int line_i, col_i;
+    char buf_byte;
+
+    tm = (sc_h - PIC_HEIGHT) / 2;
+    lm = (sc_w - PIC_WIDTH) / 2;
+    line_i = 0;
+    col_i = 0;
+    buf_byte = 0;
+    buf_i = sc_w * tm / 8 + lm;
+    cur_bit = tm % 8;
+
+    for (pic_i = 0; pic_i < PIC_HEIGHT * PIC_WIDTH; pic_i++) {
+        buf_byte |= (picture[line_i][col_i] == 'I') << cur_bit;
+        if (cur_bit < 8) {
+            cur_bit += 1;
+        }
+        else {
+            buf[buf_i] = buf_byte;
+            buf_byte = 0;
+            buf_i += sc_w;
+            cur_bit = 0;
+        }
+        line_i += 1;
+        if (PIC_HEIGHT == line_i) {
+            col_i += 1;
+            line_i = 0;
+            lm += 1;
+            if (buf_byte) {
+                buf[buf_i] = buf_byte;
+            }
+            buf_i = sc_w * tm / 8 + lm;
+            cur_bit = tm % 8;
+            buf_byte = 0;
+        }
+    }
+
+    /*int buf_i, col_i, line_i, bit_i;
     char buf_byte;
     col_i = 0;
     line_i = 0;
@@ -74,7 +112,7 @@ void fill_buf(void) {
             col_i = 0;
             line_i += 8;
         }
-    }
+    }*/
 }
 
 int main() {
