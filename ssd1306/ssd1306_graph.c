@@ -12,6 +12,7 @@ inline struct ssd1306_graph* get_graph(struct spi_device* spi) {
 
 int ssd1306_init_graph(struct spi_device* spi) {
     struct ssd1306_graph* graph = get_graph(spi);
+    struct ssd1306_config* config = ssd1306_get_config(spi);
     //devm_gpiod_get отличается тем, что он привязывает пин
     //к struct device, освобождая от необходимости вызывать devm_gpiod_put.
     //Вот до чего технологии дошли.
@@ -20,10 +21,17 @@ int ssd1306_init_graph(struct spi_device* spi) {
         printk(KERN_WARNING "Duel: couldn't access the dc pin.\n");
         return -ENOENT;
     }
+    graph->graphics_buf = kmalloc(config->width * ssd1306_get_display_pages(&config), GFP_KERNEL);
+    if (!graphics_buf) {
+        printk(KERN_WARNING "Duel: out of memory.\n");
+        return -ENOMEN;
+    }
     return 0;;
 }
 
 inline void ssd1306_exit_graph(struct spi_device* spi) {
+    struct ssd1306_graph* graph = get_graph(spi);
+    kfree(graph->graphics_buf);
     return;
 }
 

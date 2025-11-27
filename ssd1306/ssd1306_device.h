@@ -36,4 +36,7 @@ extern int ssd1306_device_trylock(struct spi_device* spi);
 extern int ssd1306_device_startup(struct spi_device* spi);
 extern int ssd1306_device_exit(struct spi_device* spi);
 
+extern struct ssd1306_config* ssd1306_get_config(struct spi_device* spi);
+extern u8 ssd1306_get_display_pages(struct ssd1306_config* config);
+
 #endif

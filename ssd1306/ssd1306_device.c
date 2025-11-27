@@ -140,3 +140,12 @@ int ssd1306_device_exit(struct spi_device* spi) {
     ssd1306_order_delay(spi, 150);
     return ssd1306_send_commands(spi);
 }
+
+inline struct ssd1306_config* ssd1306_get_config(struct spi_device* spi) {
+    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
+    return &drvdata->config;
+}
+
+inline u8 ssd1306_get_display_pages(struct ssd1306_config* config) {
+    return &config->height / 8;
+}

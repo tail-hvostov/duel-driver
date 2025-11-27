@@ -6,11 +6,10 @@
 
 #define SSD1306_DISPLAY_WIDTH 72
 #define SSD1306_DISPLAY_PAGES 5
-#define SSD1306_GRAPHICS_BUF_SIZE (SSD1306_DISPLAY_WIDTH * SSD1306_DISPLAY_PAGES)
 
 struct ssd1306_graph {
     struct gpio_desc* dc_gpio;
-    u8 graphics_buf[SSD1306_GRAPHICS_BUF_SIZE];
+    u8* graphics_buf;
     struct spi_transfer graph_transfer;
     struct spi_message graph_message;
 };
