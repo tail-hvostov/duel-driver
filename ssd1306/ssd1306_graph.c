@@ -21,7 +21,7 @@ int ssd1306_init_graph(struct spi_device* spi) {
         printk(KERN_WARNING "Duel: couldn't access the dc pin.\n");
         return -ENOENT;
     }
-    graph->graphics_buf = kmalloc(config->width * ssd1306_get_display_pages(&config), GFP_KERNEL);
+    graph->graphics_buf = kmalloc(ssd1306_get_graphics_buf_size(config), GFP_KERNEL);
     if (!graphics_buf) {
         printk(KERN_WARNING "Duel: out of memory.\n");
         return -ENOMEN;
@@ -79,6 +79,7 @@ inline int ssd1306_redraw_pages(struct spi_device* spi, unsigned int first,
 
 inline int ssd1306_reset_graphics_buf(struct spi_device* spi) {
     struct ssd1306_graph* graph = get_graph(spi);
-    memset(&graph->graphics_buf, 0, SSD1306_GRAPHICS_BUF_SIZE);
-    return ssd1306_redraw_pages(spi, 0, SSD1306_DISPLAY_PAGES - 1);
+    struct ssd1306_config* config = ssd1306_get_config(spi);
+    memset(&graph->graphics_buf, 0, ssd1306_get_graphics_buf_size(config));
+    return ssd1306_redraw_pages(spi, 0, ssd1306_get_display_pages(config) - 1);
 }

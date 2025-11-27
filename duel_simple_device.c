@@ -8,9 +8,33 @@
 #define BYTE_SIZE 8
 #define OUTER_MASK 0x80
 
-//Буфер для файловых операций.
-//Мб это лучше, чем каждый раз выделять динамически.
-static u8 usr_buf[SSD1306_GRAPHICS_BUF_SIZE];
+static u8* usr_buf = NULL;
+
+static int prepare_usr_buf() {
+    int result = 0;
+    if (NULL == usr_buf) {
+        struct spi_device* device = ssd1306_get_spi_device();
+        if (device) {
+            if (ssd1306_device_lock_interruptible(device)) {
+                result = -ERESTARTSYS;
+            }
+            else {
+                if (NULL == usr_buf) {
+                    struct ssd1306_config* config = ssd1306_get_config(device);
+                    usr_buf = kmalloc(ssd1306_get_graphics_buf_size(config), GFP_KERNEL);
+                    if (NULL == usr_buf) {
+                        result = -ENOMEM;
+                    }
+                }
+                ssd1306_device_unlock(device);
+            }
+        }
+        else {
+            result = -ENODEV;
+        }
+    }
+    return result;
+}
 
 static int fop_open(struct inode *inode, struct file *filp) {
     struct spi_device* device = ssd1306_get_spi_device();
@@ -19,6 +43,11 @@ static int fop_open(struct inode *inode, struct file *filp) {
     struct duel_simple_filp_data* filp_data;
     if (!device) {
         return -ENODEV;
+    }
+    result = prepare_usr_buf();
+    if (result) {
+        printk(KERN_WARNING "Duel: couldn't allocate memory foor the simple device.\n");
+        return result;
     }
     if (filp->f_mode & FMODE_WRITE) {
         access |= DUEL_OP_WRITING;
@@ -97,13 +126,14 @@ static inline void simple_write(const u8* buf, size_t count, const loff_t* f_pos
 
 static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos) {
     struct spi_device* device = ssd1306_get_spi_device();
+    struct ssd1306_config* config = ssd1306_get_config(device);
     size_t remaining_bytes;
     ssize_t result;
     unsigned int first_page, last_page;
     if (!device) {
         return -ENODEV;
     }
-    remaining_bytes = SSD1306_GRAPHICS_BUF_SIZE - *f_pos;
+    remaining_bytes = ssd1306_get_graphics_buf_size(config) - *f_pos;
     count = (count > remaining_bytes) ? remaining_bytes : count;
     if (count <= 0) {
         return 0;
@@ -170,12 +200,13 @@ static inline void simple_read(u8* buf, size_t count, const loff_t* f_pos,
 
 static ssize_t fop_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) {
     struct spi_device* device = ssd1306_get_spi_device();
+    struct ssd1306_config* config = ssd1306_get_config(device);
     size_t remaining_bytes;
     ssize_t result;
     if (!device) {
         return -ENODEV;
     }
-    remaining_bytes = SSD1306_GRAPHICS_BUF_SIZE - *f_pos;
+    remaining_bytes = ssd1306_get_graphics_buf_size(config) - *f_pos;
     count = (count > remaining_bytes) ? remaining_bytes : count;
     if (count <= 0) {
         return 0;
@@ -196,6 +227,8 @@ out:
 }
 
 static loff_t fop_llseek(struct file *filp, loff_t off, int whence) {
+    struct spi_device* device = ssd1306_get_spi_device();
+    struct ssd1306_config* config = ssd1306_get_config(device);
     loff_t newpos;
     switch(whence) {
     case SEEK_SET://0
@@ -205,7 +238,7 @@ static loff_t fop_llseek(struct file *filp, loff_t off, int whence) {
         newpos = filp->f_pos + off;
         break;
     case SEEK_END://2
-        newpos = SSD1306_GRAPHICS_BUF_SIZE + off;
+        newpos = ssd1306_get_graphics_buf_size(config) + off;
         break;
     default:
         return -EINVAL;
@@ -231,7 +264,7 @@ int duel_alloc_simple_dev(struct duel_simple_dev** device, int major, int minor)
     dev_t devno = MKDEV(major, minor);
     struct duel_simple_dev* instance;
     int error;
-    instance = kmalloc(sizeof(struct duel_simple_dev), GFP_KERNEL);
+    instance = kzalloc(sizeof(struct duel_simple_dev), GFP_KERNEL);
     if (!instance) {
         printk(KERN_WARNING "Duel: out of memory.\n");
         *device = NULL;
@@ -253,5 +286,8 @@ void duel_free_simple_dev(struct duel_simple_dev* device) {
     if (device != NULL) {
         cdev_del(&device->cdev);
         kfree(device);
+    }
+    if (usr_buf != NULL) {
+        kfree(usr_buf);
     }
 }

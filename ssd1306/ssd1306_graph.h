@@ -5,7 +5,6 @@
 #include <linux/gpio/consumer.h>
 
 #define SSD1306_DISPLAY_WIDTH 72
-#define SSD1306_DISPLAY_PAGES 5
 
 struct ssd1306_graph {
     struct gpio_desc* dc_gpio;

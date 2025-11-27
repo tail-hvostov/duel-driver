@@ -19,8 +19,9 @@ static ssize_t proc_read(struct file *filp, char __user *buf, size_t count, loff
         if (ssd1306_device_lock_interruptible(spi)) {
             return -ERESTARTSYS;
         }
+        struct ssd1306_config* config = ssd1306_get_config(spi);
         sprintf(text_buf, "width: %u\nheight: %u\nmemory_mode: page\n",
-                SSD1306_DISPLAY_WIDTH, SSD1306_DISPLAY_PAGES * 8);
+                config->width, config->height);
         text_buf_len = strlen(text_buf);
         ssd1306_device_unlock(spi);
     }

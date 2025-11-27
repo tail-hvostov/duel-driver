@@ -37,6 +37,7 @@ static int fop_release(struct inode *inode, struct file *filp) {
 
 static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos) {
     struct spi_device* device = ssd1306_get_spi_device();
+    struct ssd1306_config* config = ssd1306_get_config(device);
     size_t remaining_bytes;
     ssize_t result;
     unsigned int first_page, last_page;
@@ -44,7 +45,7 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
     if (!device) {
         return -ENODEV;
     }
-    remaining_bytes = SSD1306_GRAPHICS_BUF_SIZE - *f_pos;
+    remaining_bytes = ssd1306_get_graphics_buf_size(config) - *f_pos;
     count = (count > remaining_bytes) ? remaining_bytes : count;
     if (count <= 0) {
         return 0;
@@ -78,13 +79,14 @@ out:
 
 static ssize_t fop_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) {
     struct spi_device* device = ssd1306_get_spi_device();
+    struct ssd1306_config* config = ssd1306_get_config(device);
     size_t remaining_bytes;
     ssize_t result;
     u8* graphics_buf;
     if (!device) {
         return -ENODEV;
     }
-    remaining_bytes = SSD1306_GRAPHICS_BUF_SIZE - *f_pos;
+    remaining_bytes = ssd1306_get_graphics_buf_size(config) - *f_pos;
     count = (count > remaining_bytes) ? remaining_bytes : count;
     if (count <= 0) {
         return 0;
@@ -105,6 +107,8 @@ out:
 }
 
 static loff_t fop_llseek(struct file *filp, loff_t off, int whence) {
+    struct spi_device* device = ssd1306_get_spi_device();
+    struct ssd1306_config* config = ssd1306_get_config(device);
     loff_t newpos;
     switch(whence) {
     case SEEK_SET://0
@@ -114,7 +118,7 @@ static loff_t fop_llseek(struct file *filp, loff_t off, int whence) {
         newpos = filp->f_pos + off;
         break;
     case SEEK_END://2
-        newpos = SSD1306_GRAPHICS_BUF_SIZE + off;
+        newpos = ssd1306_get_graphics_buf_size(config) + off;
         break;
     default:
         return -EINVAL;

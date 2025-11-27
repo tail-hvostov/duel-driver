@@ -147,5 +147,9 @@ inline struct ssd1306_config* ssd1306_get_config(struct spi_device* spi) {
 }
 
 inline u8 ssd1306_get_display_pages(struct ssd1306_config* config) {
-    return &config->height / 8;
+    return config->height / 8;
+}
+
+u16 ssd1306_get_graphics_buf_size(struct ssd1306_config* config) {
+    return config->width * ssd1306_get_display_pages(config);
 }
