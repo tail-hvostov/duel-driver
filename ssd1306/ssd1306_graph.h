@@ -4,8 +4,6 @@
 #include <linux/spi/spi.h>
 #include <linux/gpio/consumer.h>
 
-#define SSD1306_DISPLAY_WIDTH 72
-
 struct ssd1306_graph {
     struct gpio_desc* dc_gpio;
     u8* graphics_buf;

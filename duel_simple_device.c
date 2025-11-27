@@ -74,9 +74,10 @@ static int fop_release(struct inode *inode, struct file *filp) {
 static inline void simple_write(const u8* buf, size_t count, const loff_t* f_pos,
                                 unsigned int* first_page, unsigned int* last_page,
                                 struct spi_device* device) {
-    unsigned int bit_line = (8 * *f_pos) / SSD1306_DISPLAY_WIDTH;
+    struct ssd1306_config* config = ssd1306_get_config(spi);
+    unsigned int bit_line = (8 * *f_pos) / config->width;
     //Горизонтальный бит.
-    unsigned int cur_bit = (8 * *f_pos) % SSD1306_DISPLAY_WIDTH;
+    unsigned int cur_bit = (8 * *f_pos) % config->width;
     size_t outer_i;
     u8 outer;
     u8 inner_bit;
@@ -88,7 +89,7 @@ static inline void simple_write(const u8* buf, size_t count, const loff_t* f_pos
 
     //Вертикальный бит
     inner_bit = bit_line % 8;
-    page_start = ssd1306_get_graphics_buf(device) + *first_page * SSD1306_DISPLAY_WIDTH;
+    page_start = ssd1306_get_graphics_buf(device) + *first_page * config->width;
     for (outer_i = 0; outer_i < count; outer_i++) {
         outer = buf[outer_i];
         for (bit_i = 0; bit_i < BYTE_SIZE; bit_i++) {
@@ -105,13 +106,13 @@ static inline void simple_write(const u8* buf, size_t count, const loff_t* f_pos
             page_start[cur_bit] |= mask;
             outer = outer << 1;
             cur_bit += 1;
-            if (cur_bit == SSD1306_DISPLAY_WIDTH) {
+            if (cur_bit == config->width) {
                 cur_bit = 0;
                 inner_bit += 1;
                 bit_line += 1;
                 if (inner_bit == BYTE_SIZE) {
                     inner_bit = 0;
-                    page_start += SSD1306_DISPLAY_WIDTH;
+                    page_start += config->width;
                 }
             }
         }
@@ -159,9 +160,10 @@ out:
 
 static inline void simple_read(u8* buf, size_t count, const loff_t* f_pos,
                                 struct spi_device* device) {
-    unsigned int bit_line = (8 * *f_pos) / SSD1306_DISPLAY_WIDTH;
+    struct ssd1306_config* config = ssd1306_get_config(spi);
+    unsigned int bit_line = (8 * *f_pos) / config->width;
     //Горизонтальный бит.
-    unsigned int cur_bit = (8 * *f_pos) % SSD1306_DISPLAY_WIDTH;
+    unsigned int cur_bit = (8 * *f_pos) % config->width;
     size_t outer_i;
     u8 outer;
     u8 inner_bit;
@@ -170,7 +172,7 @@ static inline void simple_read(u8* buf, size_t count, const loff_t* f_pos,
     u8 mask;
     //Вертикальный бит
     inner_bit = bit_line % 8;
-    page_start = ssd1306_get_graphics_buf(device) + (bit_line / 8) * SSD1306_DISPLAY_WIDTH;
+    page_start = ssd1306_get_graphics_buf(device) + (bit_line / 8) * config->width;
     for (outer_i = 0; outer_i < count; outer_i++) {
         outer = 0;
         for (bit_i = 0; bit_i < BYTE_SIZE; bit_i++) {
@@ -184,13 +186,13 @@ static inline void simple_read(u8* buf, size_t count, const loff_t* f_pos,
             outer = outer << 1;
             outer |= mask;
             cur_bit += 1;
-            if (cur_bit == SSD1306_DISPLAY_WIDTH) {
+            if (cur_bit == config->width) {
                 cur_bit = 0;
                 inner_bit += 1;
                 bit_line += 1;
                 if (inner_bit == BYTE_SIZE) {
                     inner_bit = 0;
-                    page_start += SSD1306_DISPLAY_WIDTH;
+                    page_start += config->width;
                 }
             }
         }

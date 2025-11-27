@@ -48,10 +48,11 @@ inline int select_page(struct spi_device* spi, unsigned int page) {
 }
 
 inline void init_page_transfer(struct ssd1306_graph* graph, unsigned int page) {
+    struct ssd1306_config* config = ssd1306_get_config(spi);
     memset(&graph->graph_transfer, 0, sizeof(struct spi_transfer));
     graph->graph_transfer.tx_buf = graph->graphics_buf +
-                                    page * SSD1306_DISPLAY_WIDTH;
-    graph->graph_transfer.len = SSD1306_DISPLAY_WIDTH;
+                                    page * config->width;
+    graph->graph_transfer.len = config->width;
     spi_message_init(&graph->graph_message);
     spi_message_add_tail(&graph->graph_transfer, &graph->graph_message);
 }

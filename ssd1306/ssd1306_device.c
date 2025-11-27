@@ -59,8 +59,7 @@ inline int ssd1306_device_trylock(struct spi_device* spi) {
 }
 
 int ssd1306_device_startup(struct spi_device* spi) {
-    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
-    struct ssd1306_config* config = &drvdata->config;
+    struct ssd1306_config* config = ssd1306_get_config(spi);
     ssd1306_hard_reset(spi);
     //Set Display ON/OFF (AEh/AFh)
     //AEh выключает дисплей.
