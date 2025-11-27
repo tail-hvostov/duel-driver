@@ -1,0 +1,56 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "allwinner,sun50i-h616";
+
+    fragment@0 {
+        target-path = "/aliases";
+            __overlay__ {
+                spi1 = "/soc/spi@5011000";
+            };
+        };
+
+    fragment@1 {
+        target = <&pio>;
+        __overlay__ {
+            ssd1306_dc_pin: ssd1306-dc-pin {
+                pins = "PC7";
+                function = "gpio_out";
+                output-low; // Начальное состояние (по умолчанию 0)
+                bias-pull-down;
+            };
+        };
+    };
+
+    fragment@2 {
+        target = <&pio>;
+        __overlay__ {
+            ssd1306_res_pin: ssd1306-res-pin {
+                pins = "PC10";
+                function = "gpio_out";
+                output-high;
+                bias-pull-up;
+            };
+        };
+    };
+
+    fragment@3 {
+        target = <&spi1>; // Указываем целевую шину (SPI1)
+        __overlay__ {
+            status = "okay";
+            #address-cells = <1>;
+            #size-cells = <0>;
+            pinctrl-names = "default";
+            pinctrl-0 = <0x22 0x4f>;
+
+            display: ssd1306@1 {
+                compatible = "duel,ssd1306_72x40";
+                reg = <1>;          // CS1
+                spi-max-frequency = <400000>;
+                dc-gpios = <&pio 2 7 0>;
+                res-gpios = <&pio 2 10 1>;
+            };
+        };
+    };
+};

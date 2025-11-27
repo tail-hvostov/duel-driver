@@ -22,7 +22,8 @@ static const struct ssd1306_config ssd1306_128x64_config = {
 };
 
 static const struct of_device_id ssd1306_dt_ids[] = {
-    {.compatible = "duel,ssd1306", .data = &ssd1306_72x40_config},
+    {.compatible = "duel,ssd1306_72x40", .data = &ssd1306_72x40_config},
+    {.compatible = "duel,ssd1306_128x64", .data = &ssd1306_128x64_config},
     { }
 };
 
