@@ -47,7 +47,8 @@ inline int select_page(struct spi_device* spi, unsigned int page) {
     return ssd1306_send_commands(spi);
 }
 
-inline void init_page_transfer(struct ssd1306_graph* graph, unsigned int page) {
+inline void init_page_transfer(struct spi_device* spi, unsigned int page) {
+    struct ssd1306_graph* graph = get_graph(spi);
     struct ssd1306_config* config = ssd1306_get_config(spi);
     memset(&graph->graph_transfer, 0, sizeof(struct spi_transfer));
     graph->graph_transfer.tx_buf = graph->graphics_buf +
@@ -61,7 +62,7 @@ int redraw_page(struct spi_device* spi, unsigned int page) {
     int result;
     struct ssd1306_graph* graph = get_graph(spi);
     select_page(spi, page);
-    init_page_transfer(graph, page);
+    init_page_transfer(spi, page);
     gpiod_set_value(graph->dc_gpio, 1);
     result = spi_sync(spi, &graph->graph_message);
     gpiod_set_value(graph->dc_gpio, 0);

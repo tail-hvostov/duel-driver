@@ -74,7 +74,7 @@ static int fop_release(struct inode *inode, struct file *filp) {
 static inline void simple_write(const u8* buf, size_t count, const loff_t* f_pos,
                                 unsigned int* first_page, unsigned int* last_page,
                                 struct spi_device* device) {
-    struct ssd1306_config* config = ssd1306_get_config(spi);
+    struct ssd1306_config* config = ssd1306_get_config(device);
     unsigned int bit_line = (8 * *f_pos) / config->width;
     //Горизонтальный бит.
     unsigned int cur_bit = (8 * *f_pos) % config->width;
@@ -160,7 +160,7 @@ out:
 
 static inline void simple_read(u8* buf, size_t count, const loff_t* f_pos,
                                 struct spi_device* device) {
-    struct ssd1306_config* config = ssd1306_get_config(spi);
+    struct ssd1306_config* config = ssd1306_get_config(device);
     unsigned int bit_line = (8 * *f_pos) / config->width;
     //Горизонтальный бит.
     unsigned int cur_bit = (8 * *f_pos) % config->width;
