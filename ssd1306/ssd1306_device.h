@@ -12,7 +12,7 @@ struct ssd1306_config {
     u8 clk_div_ratio_and_osc_freq;
     u8 contrast;
     u8 vcomh;
-    u8 col_start_addr
+    u8 col_start_addr;
 };
 
 struct ssd1306_drvdata {

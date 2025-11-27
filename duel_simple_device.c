@@ -10,7 +10,7 @@
 
 static u8* usr_buf = NULL;
 
-static int prepare_usr_buf() {
+static int prepare_usr_buf(void) {
     int result = 0;
     if (NULL == usr_buf) {
         struct spi_device* device = ssd1306_get_spi_device();

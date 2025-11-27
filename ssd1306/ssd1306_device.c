@@ -11,6 +11,14 @@ int ssd1306_init_device(struct spi_device* spi) {
         return -ENOMEM;
     }
     spi_set_drvdata(spi, drvdata);
+
+    default_config = device_get_match_data(&spi->dev);
+    if (!default_config) {
+        kfree(drvdata);
+        return -ENODEV;
+    }
+    drvdata->config = *default_config;
+
     result = ssd1306_init_cmd(spi);
     if (result) {
         kfree(drvdata);
@@ -22,14 +30,6 @@ int ssd1306_init_device(struct spi_device* spi) {
         kfree(drvdata);
         return result;
     }
-    default_config = device_get_match_data(&spi->dev);
-    if (!default_config) {
-        ssd1306_exit_graph(spi);
-        ssd1306_exit_cmd(spi);
-        kfree(drvdata);
-        return -ENODEV;
-    }
-    drvdata->config = *default_config;
 
     mutex_init(&drvdata->mutex);
     return 0;
@@ -61,7 +61,6 @@ inline int ssd1306_device_trylock(struct spi_device* spi) {
 int ssd1306_device_startup(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
     struct ssd1306_config* config = &drvdata->config;
-
     ssd1306_hard_reset(spi);
     //Set Display ON/OFF (AEh/AFh)
     //AEh выключает дисплей.
@@ -130,8 +129,11 @@ int ssd1306_device_startup(struct spi_device* spi) {
     ssd1306_order_u8(spi, 0xAF);
     ssd1306_order_delay(spi, 100);
 
-    ssd1306_reset_graphics_buf(spi);
-    return ssd1306_send_commands(spi);
+    int result = ssd1306_send_commands(spi);
+    if (result >= 0) {
+        result = ssd1306_reset_graphics_buf(spi);
+    }
+    return result;
 }
 
 int ssd1306_device_exit(struct spi_device* spi) {
