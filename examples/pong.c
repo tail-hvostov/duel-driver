@@ -13,8 +13,6 @@
 #define BRICK_HOR_MARGIN 4
 #define SCREEN_WIDTH 72
 #define SCREEN_HEIGHT 40
-#define SCREEN_MEMORY (SCREEN_HEIGHT * SCREEN_WIDTH / 8)
-#define SCREEN_PAGES (SCREEN_HEIGHT / 8)
 #define BRICK_SHIFT 3
 #define BALL_SIZE 2
 #define BALL_START_SPEED 3
@@ -123,11 +121,11 @@ void draw_bricks() {
 }
 
 void paint() {
-    memset(video_buf, 0, SCREEN_MEMORY);
+    memset(video_buf, 0, video_size);
     draw_bricks();
     draw_ball();
     lseek(fast, 0, SEEK_SET);
-    write(fast, video_buf, SCREEN_MEMORY);
+    write(fast, video_buf, video_size);
 }
 
 void move_brick_up(int* brick_y) {
@@ -146,7 +144,7 @@ void move_brick_down(int* brick_y) {
 }
 
 void move_ball() {
-    int old_y;
+    int old_y, old_x;
     old_x = ball_x;
     old_y = ball_y;
     ball_y += ball_vy;
