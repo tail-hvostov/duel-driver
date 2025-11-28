@@ -1,6 +1,9 @@
 #ifndef _SSD1306_CONFIG_H_
 #define _SSD1306_CONFIG_H_
 
+#include <linux/types.h>
+#include <linux/spi/spi.h>
+
 struct ssd1306_config {
     u8 width;
     u8 height;

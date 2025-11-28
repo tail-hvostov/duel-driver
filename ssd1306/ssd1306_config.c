@@ -10,7 +10,7 @@ int ssd1306_init_config(struct spi_device* spi) {
     }
     *config = *default_config;
     config->pages = config->height / 8 + (0 != (config->height % 8));
-    config->graphics_buf_size = config->width = config->pages;
+    config->graphics_buf_size = config->width * config->pages;
     return 0;
 }
 
