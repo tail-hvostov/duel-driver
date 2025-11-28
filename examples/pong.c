@@ -170,7 +170,7 @@ void move_ball() {
             init_game();
         }
     }
-    else if (ball_x + BALL_SIZE >= sc_w - 1 - BRICK_HOR_MARGIN) {
+    else if (ball_x + BALL_SIZE >= (int)sc_w - 1 - BRICK_HOR_MARGIN) {
         int mid_y = (old_y + ball_y) / 2;
         if ((mid_y + BALL_SIZE <= brick2_y + BRICK_HEIGHT) && (mid_y >= brick2_y)) {
             ball_vx = -(rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED);
