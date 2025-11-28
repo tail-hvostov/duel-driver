@@ -52,13 +52,21 @@ clean-tests:
 
 EXAMPLES_DIR = examples
 EXAMPLES_SRC = $(wildcard $(EXAMPLES_DIR)/*.c)
+EXAMPLES_COMMON_DIR = $(EXAMPLES_DIR)/common
 EXAMPLES_OUT = $(patsubst $(EXAMPLES_DIR)/%.c,$(EXAMPLES_DIR)/compiled/%.out,$(EXAMPLES_SRC))
+EXAMPLES_COMMON_SRC = $(wildcard $(EXAMPLES_COMMON_DIR)/*.c)
+EXAMPLES_COMMON_OBJ = $(patsubst $(EXAMPLES_COMMON_DIR)/%.c,$(EXAMPLES_DIR)/compiled/common/%.o,$(EXAMPLES_COMMON_SRC))
+EXAMPLES_CFLAGS = -I$(EXAMPLES_COMMON_DIR) -Wall -Wextra
 
 examples: $(EXAMPLES_OUT)
 
-$(EXAMPLES_DIR)/compiled/%.out: $(EXAMPLES_DIR)/%.c
+$(EXAMPLES_DIR)/compiled/%.out: $(EXAMPLES_DIR)/%.c $(EXAMPLES_COMMON_OBJ)
 	@mkdir -p $(EXAMPLES_DIR)/compiled
-	$(CC) $< -o $@
+	$(CXX) $(EXAMPLES_CFLAGS) $< $(EXAMPLES_COMMON_OBJ) -o $@
+
+$(EXAMPLES_DIR)/compiled/common/%.o: $(EXAMPLES_COMMON_DIR)/%.c
+	@mkdir -p $(EXAMPLES_DIR)/compiled/common
+	$(CXX) $(TESTS_CFLAGS) -c $< -o $@
 
 clean-examples:
 	rm -rf $(EXAMPLES_DIR)/compiled
