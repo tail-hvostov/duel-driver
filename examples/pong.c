@@ -145,7 +145,7 @@ void move_brick_down(int* brick_y) {
 }
 
 void move_ball() {
-    int old_x, old_y;
+    int old_y;
     old_x = ball_x;
     old_y = ball_y;
     ball_y += ball_vy;
@@ -189,7 +189,7 @@ void move_ball() {
     }
 }
 
-int main(int argc, const char* argv[]) {
+int main() {
     srand(time(NULL));
     fast = open("/dev/duel1", O_WRONLY);
     if (fast < 0) {
