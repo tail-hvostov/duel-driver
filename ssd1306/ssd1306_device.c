@@ -3,7 +3,6 @@
 int ssd1306_init_device(struct spi_device* spi) {
     struct ssd1306_drvdata* drvdata;
     int result;
-    const struct ssd1306_config* default_config;
 
     drvdata = kmalloc(sizeof(struct ssd1306_drvdata), GFP_KERNEL);
     if (!drvdata) {
@@ -12,21 +11,22 @@ int ssd1306_init_device(struct spi_device* spi) {
     }
     spi_set_drvdata(spi, drvdata);
 
-    default_config = device_get_match_data(&spi->dev);
-    if (!default_config) {
+    result = ssd1306_init_config(spi);
+    if (result) {
         kfree(drvdata);
-        return -ENODEV;
+        return result;
     }
-    drvdata->config = *default_config;
 
     result = ssd1306_init_cmd(spi);
     if (result) {
+        ssd1306_exit_config(spi);
         kfree(drvdata);
         return result;
     }
     result = ssd1306_init_graph(spi);
     if (result) {
         ssd1306_exit_cmd(spi);
+        ssd1306_exit_config(spi);
         kfree(drvdata);
         return result;
     }
@@ -40,6 +40,7 @@ void ssd1306_free_device(struct spi_device* spi) {
     mutex_destroy(&drvdata->mutex);
     ssd1306_exit_graph(spi);
     ssd1306_exit_cmd(spi);
+    ssd1306_exit_config(spi);
     kfree(drvdata);
 }
 
@@ -140,17 +141,4 @@ int ssd1306_device_exit(struct spi_device* spi) {
     ssd1306_order_u16(spi, 0x8D10);
     ssd1306_order_delay(spi, 150);
     return ssd1306_send_commands(spi);
-}
-
-inline struct ssd1306_config* ssd1306_get_config(struct spi_device* spi) {
-    struct ssd1306_drvdata* drvdata = spi_get_drvdata(spi);
-    return &drvdata->config;
-}
-
-inline u8 ssd1306_get_display_pages(struct ssd1306_config* config) {
-    return config->height / 8;
-}
-
-u16 ssd1306_get_graphics_buf_size(struct ssd1306_config* config) {
-    return config->width * ssd1306_get_display_pages(config);
 }
