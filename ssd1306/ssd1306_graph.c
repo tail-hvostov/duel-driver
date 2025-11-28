@@ -41,9 +41,11 @@ inline u8* ssd1306_get_graphics_buf(struct spi_device* spi) {
 }
 
 inline int select_page(struct spi_device* spi, unsigned int page) {
+    struct ssd1306_config* config = ssd1306_get_config(spi);
     u8 command = ((u8)page & SSD1306_PAGE_MASK) | (u8)0xB0;
     ssd1306_order_u8(spi, command);
-    ssd1306_order_u16(spi, 0x0C11);
+    ssd1306_order_u16(spi, 0x0010 | (((u16)(config->col_start_addr & 0xF0)) >> 4)
+        | (((u16)(config->col_start_addr & 0x0F)) << 8));
     return ssd1306_send_commands(spi);
 }
 

@@ -122,8 +122,8 @@ int ssd1306_device_startup(struct spi_device* spi) {
     //Set Higher Column Start Address for Page Addressing Mode (10h~1Fh)
     //Младшие 4 бита каждой из команд задают какую-то из частей 8-битного
     //порядкового номера стартового столбца.
-    ssd1306_order_u16(spi, 0x0010 | (((u16)(config->col_start_addr & 0xF0)) << 8)
-        | (((u16)(config->col_start_addr & 0x0F)) >> 4));
+    ssd1306_order_u16(spi, 0x0010 | (((u16)(config->col_start_addr & 0xF0)) >> 4)
+        | (((u16)(config->col_start_addr & 0x0F)) << 8));
     ssd1306_order_delay(spi, 100);
     ssd1306_order_u8(spi, 0xAF);
     ssd1306_order_delay(spi, 100);
