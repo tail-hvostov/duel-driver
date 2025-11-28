@@ -11,8 +11,6 @@
 #define FRAME_TIMEOUT 60000
 #define BRICK_HEIGHT 12
 #define BRICK_HOR_MARGIN 4
-#define SCREEN_WIDTH 72
-#define SCREEN_HEIGHT 40
 #define BRICK_SHIFT 3
 #define BALL_SIZE 2
 #define BALL_START_SPEED 3
@@ -31,10 +29,10 @@ int ball_vx;
 int ball_vy;
 
 void init_game() {
-    brick1_y = (SCREEN_HEIGHT - BRICK_HEIGHT) / 2;
+    brick1_y = (sc_h - BRICK_HEIGHT) / 2;
     brick2_y = brick1_y;
-    ball_x = (SCREEN_WIDTH - BALL_SIZE) / 2;
-    ball_y = (SCREEN_HEIGHT - BALL_SIZE) / 2;
+    ball_x = (sc_w - BALL_SIZE) / 2;
+    ball_y = (sc_h - BALL_SIZE) / 2;
     ball_vx = BALL_START_SPEED - 2 * (rand() % 2)  * BALL_START_SPEED;
     ball_vy = 0;
 }
@@ -45,7 +43,7 @@ void draw_brick(int brick_y, char* offset) {
     start_page = brick_y / 8;
     stop_page = (brick_y + BRICK_HEIGHT) / 8;
     cur_byte = offset;
-    cur_byte += (SCREEN_WIDTH * start_page);
+    cur_byte += (sc_w * start_page);
     int start_y = brick_y  % 8;
     int start_taken = 8 - start_y;
     #if BRICK_HEIGHT <= 8
@@ -63,10 +61,10 @@ void draw_brick(int brick_y, char* offset) {
     *cur_byte = 0xFF;
     *cur_byte <<= start_y;
     #endif
-    cur_byte += SCREEN_WIDTH;
+    cur_byte += sc_w;
     for (int i = start_page + 1; i < stop_page; i++) {
         *cur_byte = 0xFF;
-        cur_byte += SCREEN_WIDTH;
+        cur_byte += sc_w;
     }
     if (stop_page > start_page) {
         int stop_taken = (BRICK_HEIGHT - start_taken) % 8;
@@ -81,7 +79,7 @@ void draw_ball() {
     start_page = ball_y / 8;
     stop_page = (ball_y + BALL_SIZE) / 8;
     cur_byte = video_buf + ball_x;
-    cur_byte += (SCREEN_WIDTH * start_page);
+    cur_byte += (sc_w * start_page);
     int start_y = ball_y  % 8;
     int start_taken = 8 - start_y;
     #if BALL_SIZE <= 8
@@ -102,10 +100,10 @@ void draw_ball() {
     c <<= start_y;
     memset(cur_byte, c, BALL_SIZE);
     #endif
-    cur_byte += SCREEN_WIDTH;
+    cur_byte += sc_w;
     for (int i = start_page + 1; i < stop_page; i++) {
         memset(cur_byte, 0xFF, BALL_SIZE);
-        cur_byte += SCREEN_WIDTH;
+        cur_byte += sc_w;
     }
     if (stop_page > start_page) {
         int stop_taken = (BALL_SIZE - start_taken) % 8;
@@ -117,7 +115,7 @@ void draw_ball() {
 
 void draw_bricks() {
     draw_brick(brick1_y, video_buf + BRICK_HOR_MARGIN);
-    draw_brick(brick2_y, video_buf + (SCREEN_WIDTH - 1 - BRICK_HOR_MARGIN));
+    draw_brick(brick2_y, video_buf + (sc_w - 1 - BRICK_HOR_MARGIN));
 }
 
 void paint() {
@@ -137,15 +135,14 @@ void move_brick_up(int* brick_y) {
 
 void move_brick_down(int* brick_y) {
     *brick_y += BRICK_SHIFT;
-    int delta = SCREEN_HEIGHT - BRICK_HEIGHT - *brick_y;
+    int delta = sc_h - BRICK_HEIGHT - *brick_y;
     if (delta < 0) {
         *brick_y += delta;
     }
 }
 
 void move_ball() {
-    int old_y, old_x;
-    old_x = ball_x;
+    int old_y;
     old_y = ball_y;
     ball_y += ball_vy;
     if (ball_y < 0) {
@@ -153,7 +150,7 @@ void move_ball() {
         ball_vy = -ball_vy;
     }
     else {
-        int delta = SCREEN_HEIGHT - BRICK_HEIGHT - ball_y;
+        int delta = sc_h - BRICK_HEIGHT - ball_y;
         if (delta < 0) {
             ball_y += delta;
             ball_vy = -ball_vy;
@@ -173,11 +170,11 @@ void move_ball() {
             init_game();
         }
     }
-    else if (ball_x + BALL_SIZE >= SCREEN_WIDTH - 1 - BRICK_HOR_MARGIN) {
+    else if (ball_x + BALL_SIZE >= sc_w - 1 - BRICK_HOR_MARGIN) {
         int mid_y = (old_y + ball_y) / 2;
         if ((mid_y + BALL_SIZE <= brick2_y + BRICK_HEIGHT) && (mid_y >= brick2_y)) {
             ball_vx = -(rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED);
-            ball_x = SCREEN_WIDTH - BALL_SIZE - 2 - BRICK_HOR_MARGIN;
+            ball_x = sc_w - BALL_SIZE - 2 - BRICK_HOR_MARGIN;
             ball_vy = rand() % (BALL_MAX_SPEED - BALL_MIN_SPEED) + BALL_MIN_SPEED;
             ball_vy -= 2 * (rand() % 2) * ball_vy;
         }
