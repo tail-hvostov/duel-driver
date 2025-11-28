@@ -176,12 +176,22 @@ void move_ball() {
 }
 
 void init_game_params() {
-    brick_height = 12;
-    brick_shift = 3;
-    ball_size = 2;
-    ball_start_speed = 3;
-    ball_min_speed = 2;
-    ball_max_speed = 5;
+    if (sc_w == 72) {
+        brick_height = 12;
+        brick_shift = 3;
+        ball_size = 2;
+        ball_start_speed = 3;
+        ball_min_speed = 2;
+        ball_max_speed = 5;
+    }
+    else {
+        brick_height = 16;
+        brick_shift = 5;
+        ball_size = 3;
+        ball_start_speed = 4;
+        ball_min_speed = 3;
+        ball_max_speed = 6;
+    }
 }
 
 int main() {
