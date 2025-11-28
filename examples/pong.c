@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "common/common_ops.h"
+
 #define FRAME_TIMEOUT 60000
 #define BRICK_HEIGHT 12
 #define BRICK_HOR_MARGIN 4
@@ -29,7 +31,6 @@ int ball_x;
 int ball_y;
 int ball_vx;
 int ball_vy;
-char buf[SCREEN_MEMORY];
 
 void init_game() {
     brick1_y = (SCREEN_HEIGHT - BRICK_HEIGHT) / 2;
@@ -81,7 +82,7 @@ void draw_ball() {
     char* cur_byte;
     start_page = ball_y / 8;
     stop_page = (ball_y + BALL_SIZE) / 8;
-    cur_byte = buf + ball_x;
+    cur_byte = video_buf + ball_x;
     cur_byte += (SCREEN_WIDTH * start_page);
     int start_y = ball_y  % 8;
     int start_taken = 8 - start_y;
@@ -117,16 +118,16 @@ void draw_ball() {
 }
 
 void draw_bricks() {
-    draw_brick(brick1_y, buf + BRICK_HOR_MARGIN);
-    draw_brick(brick2_y, buf + (SCREEN_WIDTH - 1 - BRICK_HOR_MARGIN));
+    draw_brick(brick1_y, video_buf + BRICK_HOR_MARGIN);
+    draw_brick(brick2_y, video_buf + (SCREEN_WIDTH - 1 - BRICK_HOR_MARGIN));
 }
 
 void paint() {
-    memset(buf, 0, SCREEN_MEMORY);
+    memset(video_buf, 0, SCREEN_MEMORY);
     draw_bricks();
     draw_ball();
     lseek(fast, 0, SEEK_SET);
-    write(fast, buf, SCREEN_MEMORY);
+    write(fast, video_buf, SCREEN_MEMORY);
 }
 
 void move_brick_up(int* brick_y) {
@@ -190,10 +191,16 @@ void move_ball() {
 }
 
 int main() {
+    if (!init_video_params()) {
+        puts("Couldn't extract display parameters.");
+        return 0;
+    }
+
     srand(time(NULL));
     fast = open("/dev/duel1", O_WRONLY);
     if (fast < 0) {
         puts("The file did not open.");
+        delete [] video_buf;
         return 0;
     }
 
@@ -234,5 +241,6 @@ int main() {
 
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_termios);
     close(fast);
+    delete [] video_buf;
     return 0;
 }
