@@ -64,7 +64,7 @@ void fill_buf(void) {
     line_i = 0;
     col_i = 0;
     buf_byte = 0;
-    buf_i = sc_w * tm / 8 + lm;
+    buf_i = sc_w * (tm / 8) + lm;
     cur_bit = tm % 8;
 
     for (pic_i = 0; pic_i < PIC_HEIGHT * PIC_WIDTH; pic_i++) {
@@ -86,7 +86,7 @@ void fill_buf(void) {
             if (buf_byte) {
                 buf[buf_i] = buf_byte;
             }
-            buf_i = sc_w * tm / 8 + lm;
+            buf_i = sc_w * (tm / 8) + lm;
             cur_bit = tm % 8;
             buf_byte = 0;
         }
@@ -107,8 +107,8 @@ int main() {
         puts("The file did not open.");
         goto fault;
     }
-    if (360 != write(fast, buf, 360)) {
-        puts("Couldn't write 360 bytes.");
+    if (video_size != write(fast, buf, video_size)) {
+        printf("Couldn't write %u bytes.\n", video_size);
         close(fast);
         goto fault;
     }
