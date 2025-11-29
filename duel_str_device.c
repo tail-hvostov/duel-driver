@@ -120,7 +120,7 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
             memcpy(graphics_buf, &fast_syms[*cur_sym - 'a'], FAST_SYM_SIZE);
         }
         else if ((*cur_sym >= '!') && (*cur_sym <= '?')) {
-            memcpy(graphics_buf, &fast_syms[*cur_sym - '0' + ALPHABET_COUNT], FAST_SYM_SIZE);
+            memcpy(graphics_buf, &fast_syms[*cur_sym - '!' + ALPHABET_COUNT], FAST_SYM_SIZE);
         }
         else if (*cur_sym == ' ') {
             memset(graphics_buf, 0, FAST_SYM_SIZE);
