@@ -2,8 +2,42 @@
 #include "ssd1306/ssd1306_driver.h"
 #include "duel_ops_access.h"
 
-typedef u8 fast_sym[5];
+#define FAST_SYM_SIZE 5
+typedef u8 fast_sym[FAST_SYM_SIZE];
 #include "font-generator/encoded.txt"
+
+#define HOR_GAP 1
+
+static u8* usr_buf = NULL;
+static u16 usr_buf_size;
+
+static int prepare_usr_buf(void) {
+    int result = 0;
+    if (NULL == usr_buf) {
+        struct spi_device* device = ssd1306_get_spi_device();
+        if (device) {
+            if (ssd1306_device_lock_interruptible(device)) {
+                result = -ERESTARTSYS;
+            }
+            else {
+                if (NULL == usr_buf) {
+                    struct ssd1306_config* config = ssd1306_get_config(device);
+                    usr_buf_size = (config->width / (FAST_SYM_SIZE + HOR_GAP))
+                                        * ssd1306_get_display_pages(config);
+                    usr_buf = kmalloc(usr_buf_size, GFP_KERNEL);
+                    if (NULL == usr_buf) {
+                        result = -ENOMEM;
+                    }
+                }
+                ssd1306_device_unlock(device);
+            }
+        }
+        else {
+            result = -ENODEV;
+        }
+    }
+    return result;
+}
 
 static int fop_open(struct inode *inode, struct file *filp) {
     struct spi_device* device = ssd1306_get_spi_device();
@@ -12,6 +46,11 @@ static int fop_open(struct inode *inode, struct file *filp) {
     struct duel_str_filp_data* filp_data;
     if (!device) {
         return -ENODEV;
+    }
+    result = prepare_usr_buf();
+    if (result) {
+        printk(KERN_WARNING "Duel: couldn't allocate memory foor the string device.\n");
+        return result;
     }
     if (filp->f_mode & FMODE_WRITE) {
         access |= DUEL_OP_WRITING;
@@ -72,5 +111,8 @@ void duel_free_str_dev(struct duel_str_dev* device) {
     if (device != NULL) {
         cdev_del(&device->cdev);
         kfree(device);
+    }
+    if (usr_buf != NULL) {
+        kfree(usr_buf);
     }
 }
