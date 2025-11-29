@@ -41,8 +41,7 @@ while (line != ''):
 file.close()
 
 finalize_letter(line)
-print("\n};", file=out)
+print("\n};\n", file=out)
+print(f"#define FAST_SYM_COUNT {sym_counter}", file=out)
 
 out.close()
-
-print(f"Parsed {sym_counter} symbols.")
