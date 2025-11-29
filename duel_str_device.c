@@ -110,7 +110,7 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
         goto out;
     }
 
-    graphics_buf = ssd1306_get_graphics_buf(device) + (*f_pos * FAST_SYM_SIZE);
+    graphics_buf = ssd1306_get_graphics_buf(device) + (*f_pos * (FAST_SYM_SIZE + HOR_GAP));
     cur_sym = usr_buf + *f_pos;
     for (i = 0; i < count; i++) {
         if ((*cur_sym >= 'A') && (*cur_sym <= 'Z')) {
