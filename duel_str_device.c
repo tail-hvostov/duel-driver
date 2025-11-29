@@ -6,10 +6,16 @@
 typedef u8 fast_sym[FAST_SYM_SIZE];
 #include "font-generator/encoded.txt"
 
+//Сначала идут латинские символы
+//Потом цифры
+//Потом псведо-символ
+#define ALPHABET_COUNT 26
 #define HOR_GAP 1
+#define PSEUDO_SYM_INDEX (FAST_SYM_COUNT - 1)
 
-static u8* usr_buf = NULL;
+static char* usr_buf = NULL;
 static u16 usr_buf_size;
+static u16 syms_per_line;
 
 static int prepare_usr_buf(void) {
     int result = 0;
@@ -22,9 +28,10 @@ static int prepare_usr_buf(void) {
             else {
                 if (NULL == usr_buf) {
                     struct ssd1306_config* config = ssd1306_get_config(device);
-                    usr_buf_size = (config->width / (FAST_SYM_SIZE + HOR_GAP))
-                                        * ssd1306_get_display_pages(config);
+                    syms_per_line = config->width / (FAST_SYM_SIZE + HOR_GAP);
+                    usr_buf_size = syms_per_line * ssd1306_get_display_pages(config);
                     usr_buf = kmalloc(usr_buf_size, GFP_KERNEL);
+                    memset(usr_buf, ' ', usr_buf_size);
                     if (NULL == usr_buf) {
                         result = -ENOMEM;
                     }
@@ -80,9 +87,75 @@ static struct file_operations fops = {
     .owner = THIS_MODULE,
     .open = fop_open,
 	.release = fop_release,
-	//.write = pscu_write,
+	.write = fop_write,
 	//.read = pscu_read
 };
+
+static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos) {
+    struct spi_device* device = ssd1306_get_spi_device();
+    struct ssd1306_config* config = ssd1306_get_config(device);
+    size_t remaining_bytes;
+    ssize_t result;
+    unsigned int first_page, last_page;
+    u16 i;
+    char* cur_sym;
+    u8* graphics_buf;
+    if (!device) {
+        return -ENODEV;
+    }
+    remaining_bytes = usr_buf_size - *f_pos;
+    count = (count > remaining_bytes) ? remaining_bytes : count;
+    if (count <= 0) {
+        return 0;
+    }
+    if (ssd1306_device_lock_interruptible(device)) {
+        return -ERESTARTSYS;
+    }
+    if (copy_from_user(usr_buf, buf, count)) {
+        result = -EFAULT;
+        goto out;
+    }
+
+    graphics_buf = ssd1306_get_graphics_buf(device) + (*f_pos * FAST_SYM_SIZE);
+    cur_sym = usr_buf + *f_pos;
+    for (i = 0; i < count; i++) {
+        if ((*cur_sym >= 'A') && (*cur_sym <= 'Z')) {
+            memcpy(graphics_buf, &fast_syms[*cur_sym - 'A'], FAST_SYM_SIZE);
+        }
+        else if ((*cur_sym >= 'a') && (*cur_sym <= 'z')) {
+            memcpy(graphics_buf, &fast_syms[*cur_sym - 'a'], FAST_SYM_SIZE);
+        }
+        else if ((*cur_sym >= '0') && (*cur_sym <= '9')) {
+            memcpy(graphics_buf, &fast_syms[*cur_sym - '0' + ALPHABET_COUNT], FAST_SYM_SIZE);
+        }
+        else if (*cur_sym == ' ') {
+            memset(graphics_buf, 0, FAST_SYM_SIZE);
+        }
+        else {
+            memcpy(graphics_buf, &fast_syms[PSEUDO_SYM_INDEX], FAST_SYM_SIZE);
+        }
+        cur_sym++;
+        graphics_buf += FAST_SYM_SIZE;
+    }
+
+    first_page = *f_pos / syms_per_line;
+    *f_pos += count;
+
+    last_page = *f_pos / syms_per_line;
+    if (!(*f_pos % syms_per_line)) {
+        last_page -= 1;
+    }
+
+    if (ssd1306_redraw_pages(device, first_page, last_page)) {
+        result = -EIO;
+        *f_pos -= count;
+        goto out;
+    }
+    result = count;
+out:
+    ssd1306_device_unlock(device);
+    return result;
+}
 
 //Устанавливает NULL в случае неудачи.
 int duel_alloc_str_dev(struct duel_str_dev** device, int major, int minor) {
