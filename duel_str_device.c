@@ -84,17 +84,8 @@ static int fop_release(struct inode *inode, struct file *filp) {
     return 0;
 }
 
-static struct file_operations fops = {
-    .owner = THIS_MODULE,
-    .open = fop_open,
-	.release = fop_release,
-	.write = fop_write,
-	//.read = pscu_read
-};
-
 static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos) {
     struct spi_device* device = ssd1306_get_spi_device();
-    struct ssd1306_config* config = ssd1306_get_config(device);
     size_t remaining_bytes;
     ssize_t result;
     unsigned int first_page, last_page;
@@ -136,7 +127,7 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
             memcpy(graphics_buf, &fast_syms[PSEUDO_SYM_INDEX], FAST_SYM_SIZE);
         }
         cur_sym++;
-        graphics_buf += FAST_SYM_SIZE;
+        graphics_buf += FAST_SYM_SIZE + HOR_GAP;
     }
 
     first_page = *f_pos / syms_per_line;
@@ -157,6 +148,14 @@ out:
     ssd1306_device_unlock(device);
     return result;
 }
+
+static struct file_operations fops = {
+    .owner = THIS_MODULE,
+    .open = fop_open,
+	.release = fop_release,
+	.write = fop_write,
+	//.read = pscu_read
+};
 
 //Устанавливает NULL в случае неудачи.
 int duel_alloc_str_dev(struct duel_str_dev** device, int major, int minor) {
