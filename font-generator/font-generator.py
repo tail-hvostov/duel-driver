@@ -8,7 +8,7 @@ def finalize_letter(line):
         print(delim + hex(fast_bytes[i]), end="", file=out)
         delim = ", "
     print("}", file=out, end="")
-    line_delim = ",\n"
+    line_delim = ",\n    "
     fast_bytes = [0, 0, 0, 0, 0]
 
 def handle_letter_layer(line):
@@ -25,11 +25,13 @@ def handle_letter_layer(line):
 file = open("font.txt", "r")
 out = open("encoded.txt", "w")
 
+print("static const fast_sym fast_syms[] = {", file=out)
+
 line = file.readline()
 sym_counter = 0
 line_counter = 1
 fast_bytes = [0, 0, 0, 0, 0]
-line_delim = ""
+line_delim = "    "
 while (line != ''):
     if (line_counter < 8):
         handle_letter_layer(line)
@@ -39,6 +41,7 @@ while (line != ''):
 file.close()
 
 finalize_letter(line)
+print("\n};", file=out)
 
 out.close()
 
