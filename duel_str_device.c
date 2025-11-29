@@ -32,7 +32,7 @@ static int prepare_usr_buf(void) {
                     struct ssd1306_config* config = ssd1306_get_config(device);
                     syms_per_line = config->width / (FAST_SYM_SIZE + HOR_GAP);
                     usr_buf_size = syms_per_line * ssd1306_get_display_pages(config);
-                    new_line_jump = config->width % (FAST_SYM_SIZE + HOR_GAP);
+                    new_line_jump = config->width % (FAST_SYM_SIZE + HOR_GAP) + FAST_SYM_SIZE + HOR_GAP;
                     usr_buf = kmalloc(usr_buf_size, GFP_KERNEL);
                     memset(usr_buf, ' ', usr_buf_size);
                     if (NULL == usr_buf) {
