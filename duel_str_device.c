@@ -119,7 +119,7 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
         else if ((*cur_sym >= 'a') && (*cur_sym <= 'z')) {
             memcpy(graphics_buf, &fast_syms[*cur_sym - 'a'], FAST_SYM_SIZE);
         }
-        else if ((*cur_sym >= '!') && (*cur_sym <= '?')) {
+        else if ((*cur_sym >= '!') && (*cur_sym <= '@')) {
             memcpy(graphics_buf, &fast_syms[*cur_sym - '!' + ALPHABET_COUNT], FAST_SYM_SIZE);
         }
         else if (*cur_sym == ' ') {

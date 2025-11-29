@@ -454,6 +454,14 @@ A---A
 -----
 --A--
 
+-AAA-
+A---A
+A-AAA
+A-AA-
+A----
+A---A
+-AA-A
+
 AAAAA
 AAAAA
 AAAAA
