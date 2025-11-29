@@ -2,6 +2,12 @@
 #include "ssd1306/ssd1306_driver.h"
 #include "duel_ops_access.h"
 
+typedef u8 fast_sym[5];
+
+static const fast_sym fast_syms[] = {
+    #include "font-generator/encoded.txt"
+};
+
 static int fop_open(struct inode *inode, struct file *filp) {
     struct spi_device* device = ssd1306_get_spi_device();
     unsigned long access = 0;
