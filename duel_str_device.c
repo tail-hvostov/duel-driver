@@ -1,6 +1,7 @@
 #include "duel_str_device.h"
 #include "ssd1306/ssd1306_driver.h"
 #include "duel_ops_access.h"
+#include "ssd1306/ssd1306_device.h"
 
 #define FAST_SYM_SIZE 5
 typedef u8 fast_sym[FAST_SYM_SIZE];
