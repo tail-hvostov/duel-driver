@@ -8,7 +8,7 @@ typedef u8 fast_sym[FAST_SYM_SIZE];
 #include "font-generator/encoded.txt"
 
 //Сначала идут латинские символы
-//Потом цифры
+//Потом цифры и спецсимволы в промежутке [!-?]
 //Потом псведо-символ
 #define ALPHABET_COUNT 26
 #define HOR_GAP 1
@@ -119,7 +119,7 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
         else if ((*cur_sym >= 'a') && (*cur_sym <= 'z')) {
             memcpy(graphics_buf, &fast_syms[*cur_sym - 'a'], FAST_SYM_SIZE);
         }
-        else if ((*cur_sym >= '0') && (*cur_sym <= '9')) {
+        else if ((*cur_sym >= '!') && (*cur_sym <= '?')) {
             memcpy(graphics_buf, &fast_syms[*cur_sym - '0' + ALPHABET_COUNT], FAST_SYM_SIZE);
         }
         else if (*cur_sym == ' ') {
