@@ -17,6 +17,7 @@ typedef u8 fast_sym[FAST_SYM_SIZE];
 static char* usr_buf = NULL;
 static u16 usr_buf_size;
 static u16 syms_per_line;
+static u16 new_line_jump;
 
 static int prepare_usr_buf(void) {
     int result = 0;
@@ -31,6 +32,7 @@ static int prepare_usr_buf(void) {
                     struct ssd1306_config* config = ssd1306_get_config(device);
                     syms_per_line = config->width / (FAST_SYM_SIZE + HOR_GAP);
                     usr_buf_size = syms_per_line * ssd1306_get_display_pages(config);
+                    new_line_jump = config->width % (FAST_SYM_SIZE + HOR_GAP);
                     usr_buf = kmalloc(usr_buf_size, GFP_KERNEL);
                     memset(usr_buf, ' ', usr_buf_size);
                     if (NULL == usr_buf) {
@@ -127,7 +129,12 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
             memcpy(graphics_buf, &fast_syms[PSEUDO_SYM_INDEX], FAST_SYM_SIZE);
         }
         cur_sym++;
-        graphics_buf += FAST_SYM_SIZE + HOR_GAP;
+        if ((*f_pos + i + 1) % syms_per_line) {
+            graphics_buf += FAST_SYM_SIZE + HOR_GAP;
+        }
+        else {
+            graphics_buf += new_line_jump;
+        }
     }
 
     first_page = *f_pos / syms_per_line;
