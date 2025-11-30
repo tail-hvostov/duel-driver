@@ -133,13 +133,13 @@ static ssize_t fop_write(struct file *filp, const char __user *buf, size_t count
     if (ssd1306_device_lock_interruptible(device)) {
         return -ERESTARTSYS;
     }
-    if (copy_from_user(usr_buf, buf, count)) {
+    cur_sym = usr_buf + *f_pos;
+    if (copy_from_user(cur_sym, buf, count)) {
         result = -EFAULT;
         goto out;
     }
 
     graphics_buf = ssd1306_get_graphics_buf(device) + (*f_pos * (FAST_SYM_SIZE + HOR_GAP));
-    cur_sym = usr_buf + *f_pos;
     for (i = 0; i < count; i++) {
         if ((*cur_sym >= 'A') && (*cur_sym <= 'Z')) {
             memcpy(graphics_buf, &fast_syms[*cur_sym - 'A'], FAST_SYM_SIZE);
