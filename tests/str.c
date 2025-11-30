@@ -153,7 +153,7 @@ int main() {
         goto fault;
     }
     if ((buf_size - buf_size / 2) != read(str, buf, buf_size - buf_size / 2)) {
-        printf("Couldn't read %jd bytes.\n", (intmax_t)(buf_size_size - buf_size / 2));
+        printf("Couldn't read %jd bytes.\n", (intmax_t)(buf_size - buf_size / 2));
         close(str);
         goto fault;
     }
