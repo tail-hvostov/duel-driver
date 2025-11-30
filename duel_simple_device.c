@@ -53,7 +53,7 @@ static int fop_open(struct inode *inode, struct file *filp) {
         access |= DUEL_OP_WRITING;
         access |= DUEL_OP_RAW_WRITING;
     }
-    result = duel_request_ops(access);
+    result = duel_request_ops(access, NULL);
     if (result) {
         return result;
     }

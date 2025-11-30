@@ -68,7 +68,7 @@ static int fop_open(struct inode *inode, struct file *filp) {
     if (filp->f_mode & FMODE_READ) {
         access |= DUEL_OP_STR_READING;
     }
-    result = duel_request_ops(access);
+    result = duel_request_ops(access, NULL);
     if (result) {
         return result;
     }
