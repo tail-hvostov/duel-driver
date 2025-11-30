@@ -7,11 +7,30 @@
 
 #define STR_FILE "/dev/duel0"
 
+void fill_buf_with_numbers(char* buf, off_t len) {
+    char c = '0';
+    for (off_t i = 0; i < len; i++) {
+        buf[i] = c;
+        c = ('9' == c) ? '0' : (c + 1);
+    }
+}
+
+int check_buf_with_numbers(const char* buf, off_t len) {
+    char c = '0';
+    for (off_t i = 0; i < len; i++) {
+        if (c != buf[i]) {
+            return 0;
+        }
+        c = ('9' == c) ? '0' : (c + 1);
+    }
+    return 1;
+}
+
 int main() {
     int str;
     off_t buf_size;
     off_t test_buf_size;
-    char* test_buf = nullptr;
+    char* buf = nullptr;
 
     puts("1. Getting buffer size through llseek.");
     str = open(STR_FILE, O_RDONLY);
@@ -30,7 +49,7 @@ int main() {
     close(str);
 
     test_buf_size = buf_size + 20;
-    test_buf = new char[test_buf_size];
+    buf = new char[test_buf_size];
 
     printf("2. Writing %u bytes.\n", buf_size);
     str = open(STR_FILE, O_WRONLY);
@@ -54,6 +73,32 @@ int main() {
     if (test_buf_size == write(str, buf, test_buf_size)) {
         printf("%u bytes were written.\n", test_buf_size);
         close(str);
+        goto fault;
+    }
+    close(str);
+
+    puts("4. Read & write test.");
+    str = open(STR_FILE, O_WRONLY);
+    if (str < 0) {
+        puts("The file did not open.");
+        goto fault;
+    }
+    fill_buf();
+    if (buf_size != write(str, buf, buf_size)) {
+        printf("Couldn't write %u bytes.\n", buf_size);
+        close(str);
+        goto fault;
+    }
+    close(str);
+    str = open(STR_FILE, O_RDONLY);
+    memset(buf, 0, buf_size);
+    if (buf_size != read(str, buf, buf_size)) {
+        printf("Couldn't read %u bytes.\n", buf_size);
+        close(str);
+        goto fault;
+    }
+    if (!check_buf()) {
+        puts("Buffer check failed.");
         goto fault;
     }
     close(str);
