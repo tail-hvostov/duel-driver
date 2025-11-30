@@ -110,7 +110,8 @@ int main() {
         goto fault;
     }
     fill_buf_with_numbers(buf, buf_size);
-    if (buf_size != write(str, buf, buf_size)) {
+    if (((buf_size / 2) != write(str, buf, buf_size / 2)) ||
+        ((buf_size - buf_size / 2) != write(str, buf + buf_size / 2, buf_size - buf_size / 2))) {
         printf("Couldn't write %jd bytes.\n", (intmax_t)buf_size);
         close(str);
         goto fault;

@@ -110,7 +110,8 @@ int main() {
         goto fault;
     }
     fill_buf();
-    if (video_size != write(fast, buf, video_size)) {
+    if ((video_half != write(fast, buf, video_half)) ||
+        ((video_size - video_half) != write(fast, buf + video_half, video_size - video_half))) {
         printf("Couldn't write %u bytes.\n", video_size);
         close(fast);
         goto fault;
