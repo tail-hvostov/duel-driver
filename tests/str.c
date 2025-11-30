@@ -17,7 +17,8 @@ int main() {
         puts("The file did not open.");
         goto fault;
     }
-    if ((off_t)-1 == lseek(str, 0, SEEK_END)) {
+    buf_size = lseek(str, 0, SEEK_END);
+    if ((off_t)-1 == buf_size) {
         puts("Unsuccessful lseek call.");
         printf("Errno=%d.\n", errno);
         close(str);
