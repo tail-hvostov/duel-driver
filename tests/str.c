@@ -51,27 +51,27 @@ int main() {
     test_buf_size = buf_size + 20;
     buf = new char[test_buf_size];
 
-    printf("2. Writing %u bytes.\n", buf_size);
+    printf("2. Writing %jd bytes.\n", (intmax_t)buf_size);
     str = open(STR_FILE, O_WRONLY);
     if (str < 0) {
         puts("The file did not open.");
         goto fault;
     }
     if (buf_size != write(str, buf, buf_size)) {
-        printf("Couldn't write %u bytes.\n", buf_size);
+        printf("Couldn't write %jd bytes.\n", (intmax_t)buf_size);
         close(str);
         goto fault;
     }
     close(str);
 
-    printf("3. Attempting to write %u bytes.\n", test_buf_size);
+    printf("3. Attempting to write %jd bytes.\n", (intmax_t)test_buf_size);
     str = open(STR_FILE, O_WRONLY);
     if (str < 0) {
         puts("The file did not open.");
         goto fault;
     }
     if (test_buf_size == write(str, buf, test_buf_size)) {
-        printf("%u bytes were written.\n", test_buf_size);
+        printf("%jd bytes were written.\n", (intmax_t)test_buf_size);
         close(str);
         goto fault;
     }
@@ -85,7 +85,7 @@ int main() {
     }
     fill_buf_with_numbers(buf, buf_size);
     if (buf_size != write(str, buf, buf_size)) {
-        printf("Couldn't write %u bytes.\n", buf_size);
+        printf("Couldn't write %jd bytes.\n", (intmax_t)buf_size);
         close(str);
         goto fault;
     }
@@ -93,7 +93,34 @@ int main() {
     str = open(STR_FILE, O_RDONLY);
     memset(buf, 0, buf_size);
     if (buf_size != read(str, buf, buf_size)) {
-        printf("Couldn't read %u bytes.\n", buf_size);
+        printf("Couldn't read %jd bytes.\n", (intmax_t)buf_size);
+        close(str);
+        goto fault;
+    }
+    if (!check_buf_with_numbers(buf, buf_size)) {
+        puts("Buffer check failed.");
+        goto fault;
+    }
+    close(str);
+
+    puts("5. Read & write test II.");
+    str = open(STR_FILE, O_WRONLY);
+    if (str < 0) {
+        puts("The file did not open.");
+        goto fault;
+    }
+    fill_buf_with_numbers(buf, buf_size);
+    if (buf_size != write(str, buf, buf_size)) {
+        printf("Couldn't write %jd bytes.\n", (intmax_t)buf_size);
+        close(str;
+        goto fault;
+    }
+    close(str);
+    str = open(STR_FILE, O_RDONLY);
+    memset(buf, 0, buf_size);
+    if (((buf_size / 2) != read(fast, buf, buf_size / 2)) ||
+        ((buf_size - buf_size / 2) != read(fast, buf + buf_size / 2, buf_size - buf_size / 2))) {
+        printf("Couldn't read %jd bytes.\n", (intmax_t)buf_size);
         close(str);
         goto fault;
     }
