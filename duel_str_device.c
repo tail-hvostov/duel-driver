@@ -211,7 +211,6 @@ out:
 }
 
 static loff_t fop_llseek(struct file *filp, loff_t off, int whence) {
-    struct spi_device* device = ssd1306_get_spi_device();
     loff_t newpos;
     switch(whence) {
     case SEEK_SET://0
