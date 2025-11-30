@@ -131,6 +131,39 @@ int main() {
     }
     close(str);
 
+    puts("6. Read & write & seek test.");
+    str = open(STR_FILE, O_WRONLY);
+    if (str < 0) {
+        puts("The file did not open.");
+        goto fault;
+    }
+    fill_buf_with_numbers(buf, buf_size);
+    if (buf_size != write(str, buf, buf_size)) {
+        printf("Couldn't write %jd bytes.\n", (intmax_t)buf_size);
+        close(str);
+        goto fault;
+    }
+    close(str);
+    str = open(STR_FILE, O_RDONLY);
+    memset(buf + buf_size / 2, 'X', buf_size - buf_size / 2);
+    if ((off_t)-1 == lseek(str, buf_size / 2, SEEK_SET)) {
+        puts("Unsuccessful lseek call.");
+        printf("Errno=%d.\n", errno);
+        close(str);
+        goto fault;
+    }
+    if ((buf_size - buf_size / 2) != read(str, buf, buf_size - buf_size / 2)) {
+        printf("Couldn't read %jd bytes.\n", (intmax_t)(buf_size_size - buf_size / 2));
+        close(str);
+        goto fault;
+    }
+    if (!check_buf_with_numbers(buf, buf_size)) {
+        puts("Buffer check failed.");
+        close(str);
+        goto fault;
+    }
+    close(str);
+
     puts("Success!");
     delete [] buf;
     return 0;
