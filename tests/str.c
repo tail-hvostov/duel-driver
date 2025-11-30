@@ -83,7 +83,7 @@ int main() {
         puts("The file did not open.");
         goto fault;
     }
-    fill_buf();
+    fill_buf_with_numbers(buf, buf_size);
     if (buf_size != write(str, buf, buf_size)) {
         printf("Couldn't write %u bytes.\n", buf_size);
         close(str);
@@ -97,7 +97,7 @@ int main() {
         close(str);
         goto fault;
     }
-    if (!check_buf()) {
+    if (!check_buf_with_numbers(buf, buf_size)) {
         puts("Buffer check failed.");
         goto fault;
     }
