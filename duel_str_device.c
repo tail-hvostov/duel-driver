@@ -49,11 +49,35 @@ static int prepare_usr_buf(void) {
     return result;
 }
 
+static int guarantee_consistency(unsigned long stats) {
+    int result = 0;
+    struct spi_device* device = ssd1306_get_spi_device();
+    if (device) {
+        if (!(stats & DUEL_STAT_STR_CONSISTENCY)) {
+            if (ssd1306_device_lock_interruptible(device)) {
+                result = -ERESTARTSYS;
+            }
+            else {
+                if (!(stats & DUEL_STAT_STR_CONSISTENCY)) {
+                    memset(usr_buf, ' ', usr_buf_size);
+                    result = ssd1306_reset_graphics_buf(device);
+                }
+                ssd1306_device_unlock(device);
+            }
+        }
+    }
+    else {
+        result = -ENODEV;
+    }
+    return result;
+}
+
 static int fop_open(struct inode *inode, struct file *filp) {
     struct spi_device* device = ssd1306_get_spi_device();
     unsigned long access = 0;
     int result;
     struct duel_str_filp_data* filp_data;
+    unsigned long stats;
     if (!device) {
         return -ENODEV;
     }
@@ -68,7 +92,11 @@ static int fop_open(struct inode *inode, struct file *filp) {
     if (filp->f_mode & FMODE_READ) {
         access |= DUEL_OP_STR_READING;
     }
-    result = duel_request_ops(access, NULL);
+    result = duel_request_ops(access, &stats);
+    if (result) {
+        return result;
+    }
+    result = guarantee_consistency(stats);
     if (result) {
         return result;
     }
