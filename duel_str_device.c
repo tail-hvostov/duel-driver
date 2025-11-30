@@ -186,7 +186,6 @@ out:
 
 static ssize_t fop_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) {
     struct spi_device* device = ssd1306_get_spi_device();
-    struct ssd1306_config* config = ssd1306_get_config(device);
     size_t remaining_bytes;
     ssize_t result;
     if (!device) {
@@ -211,12 +210,36 @@ out:
     return result;
 }
 
+static loff_t fop_llseek(struct file *filp, loff_t off, int whence) {
+    struct spi_device* device = ssd1306_get_spi_device();
+    loff_t newpos;
+    switch(whence) {
+    case SEEK_SET://0
+        newpos = off;
+        break;
+    case SEEK_CUR://1
+        newpos = filp->f_pos + off;
+        break;
+    case SEEK_END://2
+        newpos = usr_buf_size + off;
+        break;
+    default:
+        return -EINVAL;
+    }
+    if (newpos < 0) {
+        return -EINVAL;
+    }
+    filp->f_pos = newpos;
+    return newpos;
+}
+
 static struct file_operations fops = {
     .owner = THIS_MODULE,
     .open = fop_open,
 	.release = fop_release,
 	.write = fop_write,
-	.read = fop_read
+	.read = fop_read,
+    .llseek = fop_llseek
 };
 
 //Устанавливает NULL в случае неудачи.
